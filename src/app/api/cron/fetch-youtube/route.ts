@@ -34,8 +34,10 @@ export async function GET(req: Request) {
     ];
 
     let upsertedCount = 0;
+    let firstError = null;
 
     for (const video of allVideos) {
+      // ... same tools logic
       const textForTags = (video.title + " " + video.description).toLowerCase();
       const tools = [];
       if (textForTags.includes("veo")) tools.push("Veo");
@@ -46,7 +48,7 @@ export async function GET(req: Request) {
       
       const viewCountInt = parseInt(video.views.replace(/\D/g, "")) || 0;
 
-      const { error } = await supabase
+      const { error: upsertError } = await supabase
         .from("videos")
         .upsert({
           youtube_id: video.id,
@@ -60,8 +62,9 @@ export async function GET(req: Request) {
           ai_tool_tags: tools,
         }, { onConflict: "youtube_id" });
 
-      if (error) {
-        console.error(`Error upserting video ${video.id}:`, error);
+      if (upsertError) {
+        console.error(`Error upserting video ${video.id}:`, upsertError);
+        if (!firstError) firstError = upsertError;
       } else {
         upsertedCount++;
       }
@@ -69,11 +72,12 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ 
       success: true, 
-      message: `Synced ${upsertedCount} videos successfully.`,
+      message: `Synced ${upsertedCount} videos.`,
       debug: {
         moviesFound: movies.length,
         dramasFound: dramas.length,
-        totalAttempted: allVideos.length
+        totalAttempted: allVideos.length,
+        supabaseError: firstError
       }
     });
   } catch (error: any) {
