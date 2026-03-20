@@ -63,11 +63,12 @@ function timeAgo(dateString: string) {
 
 export async function fetchAIVideos(query: string = "AI short film", maxResults: number = 30): Promise<YouTubeVideoInfo[]> {
   try {
-    // 1. Search for videos via /search
+    // 1. Search for videos via /search (videoCategoryId=1 is Film & Animation)
+    const exactQuery = query + " -tutorial -how -review -news -podcast -react -scam -vs";
     const searchRes = await fetch(
       `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(
-        query
-      )}&maxResults=${maxResults}&type=video&key=${API_KEY}`
+        exactQuery
+      )}&maxResults=${maxResults}&type=video&videoCategoryId=1&key=${API_KEY}`
     );
 
     if (!searchRes.ok) {

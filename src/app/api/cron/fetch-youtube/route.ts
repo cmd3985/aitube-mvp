@@ -41,21 +41,28 @@ export async function GET(req: Request) {
       const descLower = v.description.toLowerCase();
       const fullText = (titleLower + " " + descLower);
 
+      // Discard Trash (Reject Patterns)
+      const rejectPatterns = ["how to", "tutorial", "making of", "behind the scenes", "news", "review", "reaction", "vs", "scam", "course", "step by step"];
+      const isTrash = rejectPatterns.some(p => fullText.includes(p));
+      if (isTrash) continue; // Skip to next video
+
+      // Categories
       let category = null;
 
-      // Movies criteria: >= 10m OR title/desc has #AI시네마, Full Movie, 시네마틱
-      const isMovieKeyword = fullText.includes("#ai시네마") || fullText.includes("full movie") || fullText.includes("시네마틱");
+      // Movies criteria: >= 10m OR title/desc has movie keywords
+      const movieKeywords = ["#ai시네마", "full movie", "시네마틱", "short film", "trailer", "concept", "단편"];
+      const isMovieKeyword = movieKeywords.some(kw => fullText.includes(kw));
       
-      // Dramas criteria: < 10m AND title has Ep.01, Episode, 웹드라마, 시리즈, Season OR tags #AI드라마
-      const isDramaKeyword = titleLower.includes("ep.01") || titleLower.includes("episode") || titleLower.includes("웹드라마") || titleLower.includes("시리즈") || titleLower.includes("season") || fullText.includes("#ai드라마");
+      // Dramas criteria: title has drama keywords
+      const dramaKeywords = ["ep.01", "episode", "ep.", "웹드라마", "시리즈", "season", "#ai드라마"];
+      const isDramaKeyword = dramaKeywords.some(kw => titleLower.includes(kw) || fullText.includes(kw));
 
       if (durationSec >= 600 || isMovieKeyword) {
         category = "Movie";
       } else if (durationSec < 600 && isDramaKeyword) {
         category = "Drama";
       } else {
-        // default fallback to Movie if >= 3m, else Drama just to be safe, or just ignore. 
-        // User said: "apply following criteria". If it doesn't match, maybe we discard? Let's just fallback to Movie if >= 3m, else Drama to have data.
+        // Fallback for valid lengths that didn't match keywords (mostly normal movies)
         category = durationSec >= 180 ? "Movie" : "Drama"; 
       }
 
