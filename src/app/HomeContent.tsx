@@ -44,8 +44,9 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
       return bViews - aViews;
     }
     if (activeSort === "latest") {
-      // Just mock sorting or rely on DB order
-      return 0; // DB already sorts by Popular usually, if Latest, would compare uploadedAt
+      const dateA = a.rawDate ? new Date(a.rawDate).getTime() : 0;
+      const dateB = b.rawDate ? new Date(b.rawDate).getTime() : 0;
+      return dateB - dateA;
     }
     if (activeSort === "runtime") {
       return getSecs(b.duration) - getSecs(a.duration);

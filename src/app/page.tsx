@@ -22,7 +22,8 @@ export default async function Home() {
     thumbnail: v.thumbnail_url,
     duration: v.duration,
     views: v.view_count.toString() + " views",
-    uploadedAt: v.published_at,
+    uploadedAt: v.published_at, // this actually is ISO string but formatted later? Wait, timeAgo is done in fetch, so it's a string like "5 months ago".
+    rawDate: v.published_at,
     channelTitle: v.channel_title || "Unknown Channel",
     category: v.category,
     ai_tool_tags: Array.isArray(v.ai_tool_tags) ? v.ai_tool_tags.join(",") : v.ai_tool_tags,

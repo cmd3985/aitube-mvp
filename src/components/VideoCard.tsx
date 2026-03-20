@@ -14,6 +14,7 @@ export interface VideoProps {
   isDrama?: boolean;
   episode?: number;
   language?: string;
+  rawDate?: string;
 }
 
 export function VideoCard({ video, onClick }: { video: VideoProps, onClick?: () => void }) {

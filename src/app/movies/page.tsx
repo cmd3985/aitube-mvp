@@ -28,6 +28,7 @@ export default async function MoviesPage() {
     duration: v.duration,
     views: v.view_count.toString() + " views",
     uploadedAt: v.published_at,
+    rawDate: v.published_at,
     channelTitle: v.channel_title || "Unknown Channel",
     category: v.category,
     ai_tool_tags: Array.isArray(v.ai_tool_tags) ? v.ai_tool_tags.join(",") : v.ai_tool_tags,
