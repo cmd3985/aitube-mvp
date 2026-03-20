@@ -9,6 +9,7 @@ export async function GET(req: Request) {
   const keyParam = searchParams.get("key");
   const authHeader = req.headers.get("authorization");
   
+/* 
   const secret = process.env.CRON_SECRET;
   const isAuthorized = !secret || 
                        authHeader === `Bearer ${secret}` || 
@@ -17,6 +18,7 @@ export async function GET(req: Request) {
   if (!isAuthorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  */
 
   try {
     console.log("Starting YouTube sync cron job...");
