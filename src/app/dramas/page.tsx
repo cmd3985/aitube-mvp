@@ -6,7 +6,7 @@ export const metadata = {
   description: "AI-generated dramas",
 };
 
-export const revalidate = 3600;
+export const revalidate = 0;
 
 export default async function DramasPage() {
   const { data: dbDramas, error } = await supabase

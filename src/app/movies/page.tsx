@@ -6,7 +6,7 @@ export const metadata = {
   description: "AI-generated movies",
 };
 
-export const revalidate = 3600;
+export const revalidate = 0;
 
 export default async function MoviesPage() {
   const { data: dbMovies, error } = await supabase

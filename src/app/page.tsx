@@ -2,7 +2,7 @@ import { Hero } from "@/components/Hero";
 import { supabase } from "@/lib/supabase";
 import { HomeContent } from "./HomeContent";
 
-export const revalidate = 3600;
+export const revalidate = 0;
 
 export default async function Home() {
   const { data: videosFromDb, error } = await supabase
