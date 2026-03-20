@@ -9,7 +9,7 @@ export default async function Home() {
     .from("videos")
     .select("*")
     .order("view_count", { ascending: false })
-    .limit(30);
+    .limit(500);
 
   if (error) {
     console.error("Error fetching videos:", error);

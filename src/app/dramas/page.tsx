@@ -14,7 +14,7 @@ export default async function DramasPage() {
     .select("*")
     .eq("category", "Drama")
     .order("view_count", { ascending: false })
-    .limit(30);
+    .limit(500);
 
   if (error) {
     console.error("Error fetching dramas:", error);

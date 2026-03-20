@@ -7,9 +7,26 @@ import type { YouTubeVideoInfo } from "@/lib/youtube";
 
 export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) {
   const [activeSort, setActiveSort] = useState("popular");
+  const [activeDuration, setActiveDuration] = useState("All");
 
-  // Filtering (only sorts now since tool filter is removed)
-  const filteredVideos = initialVideos.sort((a, b) => {
+  const getSecs = (duration: string) => {
+    const parts = duration.split(":").map(Number);
+    if (parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
+    return parts[0]*60 + parts[1];
+  };
+
+  // Filtering and sorting
+  const filteredVideos = initialVideos.filter(v => {
+    if (activeDuration === "All") return true;
+    const m = getSecs(v.duration) / 60;
+    if (activeDuration === "Under 10m") return m < 10;
+    if (activeDuration === "10m - 20m") return m >= 10 && m < 20;
+    if (activeDuration === "20m - 30m") return m >= 20 && m < 30;
+    if (activeDuration === "30m - 40m") return m >= 30 && m < 40;
+    if (activeDuration === "40m - 50m") return m >= 40 && m < 50;
+    if (activeDuration === "1h+") return m >= 60;
+    return true;
+  }).sort((a, b) => {
     if (activeSort === "popular") {
       const aViews = parseInt(a.views.replace(/\D/g, "")) || 0;
       const bViews = parseInt(b.views.replace(/\D/g, "")) || 0;
@@ -20,11 +37,6 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
       return 0; // DB already sorts by Popular usually, if Latest, would compare uploadedAt
     }
     if (activeSort === "runtime") {
-      const getSecs = (duration: string) => {
-        const parts = duration.split(":").map(Number);
-        if (parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
-        return parts[0]*60 + parts[1];
-      };
       return getSecs(b.duration) - getSecs(a.duration);
     }
     return 0;
@@ -34,6 +46,8 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
     <main className="w-full">
       <FilterBar 
         onSortChange={setActiveSort}
+        activeDuration={activeDuration}
+        onDurationChange={setActiveDuration}
       />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

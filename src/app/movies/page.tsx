@@ -14,7 +14,7 @@ export default async function MoviesPage() {
     .select("*")
     .eq("category", "Movie")
     .order("view_count", { ascending: false })
-    .limit(30);
+    .limit(500);
 
   if (error) {
     console.error("Error fetching movies:", error);
