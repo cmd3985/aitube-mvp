@@ -65,10 +65,16 @@ export async function fetchAIVideos(query: string = "AI short film", maxResults:
   try {
     // 1. Search for videos via /search
     const searchRes = await fetch(
-      `${BASE_URL}/search?part=id&q=${encodeURIComponent(query)}&type=video&videoDefinition=high&maxResults=${maxResults}&key=${API_KEY}`,
-      { next: { revalidate: 3600 } }
+      `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(
+        query
+      )}&maxResults=${maxResults}&type=video&key=${API_KEY}`
     );
-    if (!searchRes.ok) throw new Error("Failed to fetch search results");
+
+    if (!searchRes.ok) {
+      const errData = await searchRes.json();
+      console.error("YouTube API Search Error:", errData);
+      throw new Error(`YouTube API Search failed: ${JSON.stringify(errData.error?.message || "Unknown error")}`);
+    }
     const searchData = await searchRes.json();
     
     if (!searchData.items || searchData.items.length === 0) return [];
