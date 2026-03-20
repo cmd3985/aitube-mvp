@@ -4,11 +4,13 @@ import { useState } from "react";
 import { FilterBar } from "@/components/FilterBar";
 import { VideoCard, VideoProps } from "@/components/VideoCard";
 import type { YouTubeVideoInfo } from "@/lib/youtube";
+import { X } from "lucide-react";
 
 export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) {
   const [activeSort, setActiveSort] = useState("popular");
   const [activeDuration, setActiveDuration] = useState("All");
   const [activeLanguage, setActiveLanguage] = useState("All");
+  const [selectedVideo, setSelectedVideo] = useState<VideoProps | null>(null);
 
   const getSecs = (duration: string) => {
     const parts = duration.split(":").map(Number);
@@ -77,11 +79,37 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
                   isDrama: video.title.toLowerCase().includes("episode") || video.title.toLowerCase().includes("ep."),
                   episode: video.title.toLowerCase().includes("ep.") ? 1 : undefined
                 }} 
+                onClick={() => setSelectedVideo(video)}
               />
             ))}
           </div>
         )}
       </div>
+
+      {/* Video Modal Player */}
+      {selectedVideo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
+          <div 
+            className="absolute inset-0 cursor-pointer" 
+            onClick={() => setSelectedVideo(null)}
+          />
+          <div className="relative w-full max-w-6xl aspect-video rounded-2xl overflow-hidden glass border-neon-blue/50 shadow-[0_0_50px_rgba(0,242,254,0.15)] animate-in fade-in zoom-in duration-300">
+            <button
+              onClick={() => setSelectedVideo(null)}
+              className="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 hover:bg-neon-purple/80 text-white transition-colors border border-white/10"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <iframe
+              src={`https://www.youtube.com/embed/${selectedVideo.id}?autoplay=1&rel=0`}
+              title={selectedVideo.title}
+              className="w-full h-full border-0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      )}
     </main>
   );
 }

@@ -16,9 +16,10 @@ export interface VideoProps {
   language?: string;
 }
 
-export function VideoCard({ video }: { video: VideoProps }) {
+export function VideoCard({ video, onClick }: { video: VideoProps, onClick?: () => void }) {
   return (
     <motion.div
+      onClick={onClick}
       whileHover={{ y: -8 }}
       className="relative group cursor-pointer glass rounded-xl overflow-hidden transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,242,254,0.3)] hover:border-neon-blue/50"
     >
