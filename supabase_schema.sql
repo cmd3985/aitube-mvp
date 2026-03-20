@@ -11,6 +11,7 @@ CREATE TABLE public.videos (
     published_at TEXT,
     category TEXT NOT NULL, -- 'Movie' or 'Drama'
     ai_tool_tags TEXT[], -- Array of strings (e.g. ['Veo', 'Pika'])
+    channel_title TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -26,3 +27,7 @@ USING ( true );
 
 -- (선택) 데이터베이스의 view_count 숫자 업데이트나 삽입은, 서버 사이드(Cron Job)의 Service Role Key를 사용하므로
 -- 위와 같이 Select 정책만 있어도 충분합니다!
+
+-- =========== [마이그레이션 안내] ===========
+-- 기존 테이블이 있다면 아래 쿼리를 추가로 실행해서 컬럼을 추가해주세요!
+-- ALTER TABLE public.videos ADD COLUMN channel_title TEXT DEFAULT 'Unknown';

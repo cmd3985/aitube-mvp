@@ -28,7 +28,7 @@ export default async function DramasPage() {
     duration: v.duration,
     views: v.view_count.toString() + " views",
     uploadedAt: v.published_at,
-    channelTitle: "AI Creator",
+    channelTitle: v.channel_title || "Unknown Channel",
     category: v.category,
     ai_tool_tags: Array.isArray(v.ai_tool_tags) ? v.ai_tool_tags.join(",") : v.ai_tool_tags,
   }));

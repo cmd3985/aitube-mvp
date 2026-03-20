@@ -23,21 +23,49 @@ export async function GET(req: Request) {
   try {
     console.log("Starting YouTube sync cron job...");
     
-    // Fetch Movies
-    const movies = await fetchAIVideos("AI movie", 20);
-    // Fetch Dramas
-    const dramas = await fetchAIVideos("AI drama", 20);
+    // Fetch combined keyword videos
+    const searchQuery = "AI film|AI movie|AI generated drama|AI webdrama|AI cinematic|AI short film|AI documentary|#AIFilm|#AI시네마";
+    const rawVideos = await fetchAIVideos(searchQuery, 40);
     
-    const allVideos = [
-      ...movies.map(v => ({ ...v, category: "Movie" })),
-      ...dramas.map(v => ({ ...v, category: "Drama" }))
-    ];
+    // Categorize
+    const allVideos = [];
+    for (const v of rawVideos) {
+      const getDurationSecs = (durStr: string) => {
+        const parts = durStr.split(":").map(Number);
+        if (parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
+        return parts[0]*60 + parts[1];
+      };
+      const durationSec = getDurationSecs(v.duration);
+      
+      const titleLower = v.title.toLowerCase();
+      const descLower = v.description.toLowerCase();
+      const fullText = (titleLower + " " + descLower);
+
+      let category = null;
+
+      // Movies criteria: >= 10m OR title/desc has #AI시네마, Full Movie, 시네마틱
+      const isMovieKeyword = fullText.includes("#ai시네마") || fullText.includes("full movie") || fullText.includes("시네마틱");
+      
+      // Dramas criteria: < 10m AND title has Ep.01, Episode, 웹드라마, 시리즈, Season OR tags #AI드라마
+      const isDramaKeyword = titleLower.includes("ep.01") || titleLower.includes("episode") || titleLower.includes("웹드라마") || titleLower.includes("시리즈") || titleLower.includes("season") || fullText.includes("#ai드라마");
+
+      if (durationSec >= 600 || isMovieKeyword) {
+        category = "Movie";
+      } else if (durationSec < 600 && isDramaKeyword) {
+        category = "Drama";
+      } else {
+        // default fallback to Movie if >= 3m, else Drama just to be safe, or just ignore. 
+        // User said: "apply following criteria". If it doesn't match, maybe we discard? Let's just fallback to Movie if >= 3m, else Drama to have data.
+        category = durationSec >= 180 ? "Movie" : "Drama"; 
+      }
+
+      allVideos.push({ ...v, category });
+    }
 
     let upsertedCount = 0;
     let firstError = null;
 
     for (const video of allVideos) {
-      // ... same tools logic
       const textForTags = (video.title + " " + video.description).toLowerCase();
       const tools = [];
       if (textForTags.includes("veo")) tools.push("Veo");
@@ -60,6 +88,7 @@ export async function GET(req: Request) {
           category: video.category,
           published_at: video.uploadedAt,
           ai_tool_tags: tools,
+          channel_title: video.channelTitle,
         }, { onConflict: "youtube_id" });
 
       if (upsertError) {
@@ -70,12 +99,15 @@ export async function GET(req: Request) {
       }
     }
 
+    const moviesFound = allVideos.filter(v => v.category === "Movie").length;
+    const dramasFound = allVideos.filter(v => v.category === "Drama").length;
+
     return NextResponse.json({ 
       success: true, 
       message: `Synced ${upsertedCount} videos.`,
       debug: {
-        moviesFound: movies.length,
-        dramasFound: dramas.length,
+        moviesFound,
+        dramasFound,
         totalAttempted: allVideos.length,
         supabaseError: firstError
       }
