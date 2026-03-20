@@ -48,6 +48,14 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
       const dateB = b.rawDate ? new Date(b.rawDate).getTime() : 0;
       return dateB - dateA;
     }
+    if (activeSort === "trending") {
+      const getTrendingScore = (v: VideoProps) => {
+        const views = parseInt(v.views.replace(/\D/g, "")) || 0;
+        const hours = (Date.now() - (v.rawDate ? new Date(v.rawDate).getTime() : Date.now())) / (1000 * 60 * 60);
+        return views / Math.pow(Math.max(hours, 2), 1.5); // HackerNews gravity algorithm
+      };
+      return getTrendingScore(b) - getTrendingScore(a);
+    }
     if (activeSort === "runtime") {
       return getSecs(b.duration) - getSecs(a.duration);
     }

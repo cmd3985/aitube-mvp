@@ -7,6 +7,7 @@ import { Globe, ChevronDown, Filter, Clock, Flame, Calendar, PlaySquare } from "
 const SORT_OPTIONS = [
   { id: "popular", label: "Popular", icon: Flame },
   { id: "latest", label: "Latest", icon: Calendar },
+  { id: "trending", label: "Trending", icon: PlaySquare },
   { id: "runtime", label: "Runtime", icon: Clock },
 ];
 export const DURATIONS = [
