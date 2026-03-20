@@ -6,20 +6,20 @@ import { VideoCard, VideoProps } from "@/components/VideoCard";
 import type { YouTubeVideoInfo } from "@/lib/youtube";
 
 export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) {
-  const [activeSort, setActiveSort] = useState("Popular");
+  const [activeSort, setActiveSort] = useState("popular");
 
   // Filtering (only sorts now since tool filter is removed)
   const filteredVideos = initialVideos.sort((a, b) => {
-    if (activeSort === "Popular") {
+    if (activeSort === "popular") {
       const aViews = parseInt(a.views.replace(/\D/g, "")) || 0;
       const bViews = parseInt(b.views.replace(/\D/g, "")) || 0;
       return bViews - aViews;
     }
-    if (activeSort === "Latest") {
+    if (activeSort === "latest") {
       // Just mock sorting or rely on DB order
       return 0; // DB already sorts by Popular usually, if Latest, would compare uploadedAt
     }
-    if (activeSort === "Longest") {
+    if (activeSort === "runtime") {
       const getSecs = (duration: string) => {
         const parts = duration.split(":").map(Number);
         if (parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
@@ -33,8 +33,7 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
   return (
     <main className="w-full">
       <FilterBar 
-        activeSort={activeSort}
-        setActiveSort={setActiveSort}
+        onSortChange={setActiveSort}
       />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
