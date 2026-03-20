@@ -59,7 +59,27 @@ export async function GET(req: Request) {
         category = durationSec >= 180 ? "Movie" : "Drama"; 
       }
 
-      allVideos.push({ ...v, category });
+      // Language Inference
+      let language = "영어"; // default
+      if (fullText.includes("no dialogue") || fullText.includes("silent") || fullText.includes("bgm") || fullText.includes("music only")) {
+        language = "No Dialogue";
+      } else if (/[가-힣]/.test(fullText)) {
+        language = "한국어";
+      } else if (/[ぁ-んァ-ン]/.test(fullText)) {
+        language = "일본어";
+      } else if (/[一-龥]/.test(fullText)) {
+        language = "중국어";
+      } else if (/[\u0900-\u097F]/.test(fullText) || fullText.includes("hindi")) {
+        language = "힌디어";
+      } else if (/\b(el|la|los|las|un|una|es|en|para|con|spanish)\b/.test(fullText)) {
+        language = "스페인어";
+      } else if (/\b(o|a|os|as|um|uma|é|em|para|com|portuguese)\b/.test(fullText)) {
+        language = "포르투갈어";
+      } else if (/\b(le|la|les|un|une|est|et|en|pour|dans|french)\b/.test(fullText)) {
+        language = "프랑스어";
+      }
+
+      allVideos.push({ ...v, category, language });
     }
 
     let upsertedCount = 0;
@@ -89,6 +109,7 @@ export async function GET(req: Request) {
           published_at: video.uploadedAt,
           ai_tool_tags: tools,
           channel_title: video.channelTitle,
+          language: video.language,
         }, { onConflict: "youtube_id" });
 
       if (upsertError) {

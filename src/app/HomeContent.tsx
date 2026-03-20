@@ -8,6 +8,7 @@ import type { YouTubeVideoInfo } from "@/lib/youtube";
 export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) {
   const [activeSort, setActiveSort] = useState("popular");
   const [activeDuration, setActiveDuration] = useState("All");
+  const [activeLanguage, setActiveLanguage] = useState("All");
 
   const getSecs = (duration: string) => {
     const parts = duration.split(":").map(Number);
@@ -17,6 +18,14 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
 
   // Filtering and sorting
   const filteredVideos = initialVideos.filter(v => {
+    // 1. Language Filter
+    if (activeLanguage !== "All") {
+      // If language is somehow undefined or missing on old records, fallback check or just hide
+      const vLang = v.language || "Unknown";
+      if (vLang !== activeLanguage) return false;
+    }
+
+    // 2. Duration Filter
     if (activeDuration === "All") return true;
     const m = getSecs(v.duration) / 60;
     if (activeDuration === "Under 10m") return m < 10;
@@ -48,6 +57,8 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
         onSortChange={setActiveSort}
         activeDuration={activeDuration}
         onDurationChange={setActiveDuration}
+        activeLanguage={activeLanguage}
+        onLanguageChange={setActiveLanguage}
       />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

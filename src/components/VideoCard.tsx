@@ -13,6 +13,7 @@ export interface VideoProps {
   channelTitle?: string;
   isDrama?: boolean;
   episode?: number;
+  language?: string;
 }
 
 export function VideoCard({ video }: { video: VideoProps }) {

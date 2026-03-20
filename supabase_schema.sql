@@ -12,6 +12,7 @@ CREATE TABLE public.videos (
     category TEXT NOT NULL, -- 'Movie' or 'Drama'
     ai_tool_tags TEXT[], -- Array of strings (e.g. ['Veo', 'Pika'])
     channel_title TEXT,
+    language TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -31,3 +32,4 @@ USING ( true );
 -- =========== [마이그레이션 안내] ===========
 -- 기존 테이블이 있다면 아래 쿼리를 추가로 실행해서 컬럼을 추가해주세요!
 -- ALTER TABLE public.videos ADD COLUMN channel_title TEXT DEFAULT 'Unknown';
+-- ALTER TABLE public.videos ADD COLUMN language TEXT DEFAULT 'Unknown';

@@ -31,6 +31,7 @@ export default async function MoviesPage() {
     channelTitle: v.channel_title || "Unknown Channel",
     category: v.category,
     ai_tool_tags: Array.isArray(v.ai_tool_tags) ? v.ai_tool_tags.join(",") : v.ai_tool_tags,
+    language: v.language || "Unknown",
   }));
 
   return (
