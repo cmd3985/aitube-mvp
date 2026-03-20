@@ -31,8 +31,8 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
   });
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <StickyFilter 
+    <main className="w-full">
+      <FilterBar 
         activeSort={activeSort}
         setActiveSort={setActiveSort}
       />
@@ -45,7 +45,7 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {videos.map((video) => (
+            {filteredVideos.map((video) => (
               <VideoCard 
                 key={video.id} 
                 video={{
@@ -58,6 +58,6 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 }
