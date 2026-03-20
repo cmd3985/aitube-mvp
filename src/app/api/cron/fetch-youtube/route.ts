@@ -50,14 +50,76 @@ export async function GET(req: Request) {
       };
       const durationSec = getDurationSecs(v.duration);
       
+      // Core Text for Analysis
       const titleLower = v.title.toLowerCase();
       const descLower = v.description.toLowerCase();
       const fullText = (titleLower + " " + descLower);
 
-      // Discard Trash (Reject Patterns)
-      const rejectPatterns = ["how to", "tutorial", "making of", "behind the scenes", "news", "review", "reaction", "vs", "scam", "course", "step by step"];
-      const isTrash = rejectPatterns.some(p => fullText.includes(p));
-      if (isTrash) continue; // Skip to next video
+      // --- STEP 1: Multi-lingual Blacklist (Drop, Cost 0) ---
+      const blacklist = [
+        "결말포함", "영화리뷰", "명작", "요약", "몰아보기", "스포", "평론", // KO
+        "ending explained", "recap", "movie review", "explained", "summary", "reaction", "how to", "tutorial", // EN
+        "ネタバレ", "レビュー", "結末", "解説", "要約", "反応", // JA
+        "resumen", "reseña", "final explicado", "crítica", "résumé", "fin expliquée", "resumo", // ES/FR/PT
+        "解说", "影评", "结局", "剧透", "समीक्षा", "स्पष्टीकरण" // ZH/HI
+      ];
+      
+      const isBlacklisted = blacklist.some(p => fullText.includes(p));
+      const channelLower = (v.channelTitle || "").toLowerCase();
+      const channelIsReview = channelLower.includes("review") || channelLower.includes("recap") || channelLower.includes("리뷰");
+      if (isBlacklisted || channelIsReview) {
+        continue; // Drop video entirely
+      }
+
+      // --- STEP 2: Multi-lingual Whitelist (Fast-Pass, Cost 0) ---
+      const whitelist = [
+        "ai short film", "ai movie", "ai cinematic", "ai webdrama", "full ai film", "ai generated film",
+        "ai 단편영화", "ai 영화", "ai 웹드라마", "ai 애니메이션", "ai 시네마",
+        "ai短編映画", "ai映画", "aiアニメ", "ai生成動画", "フルai映画",
+        "cortometraje ai", "cortometraje ia", "película ai", "película ia", "court métrage ia", "film ia", "curta-metragem ia", "filme ia",
+        "ai短片", "ai电影", "ai微电影", "ai शॉर्ट फिल्म", "ai फिल्म"
+      ];
+      const isWhitelisted = whitelist.some(p => titleLower.includes(p) || descLower.includes(p));
+
+      // --- STEP 3: LLM Grey Area Check (Cost) ---
+      if (!isWhitelisted) {
+        // If not explicitly whitelisted, check with LLM
+        if (process.env.OPENAI_API_KEY) {
+          try {
+            const llmRes = await fetch("https://api.openai.com/v1/chat/completions", {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                model: "gpt-4o-mini",
+                messages: [
+                  { 
+                    role: "system", 
+                    content: "당신은 영상 판별 전문가입니다. 제목과 설명을 보고, 이 영상이 오직 생성형 AI 툴(Midjourney, Runway, Veo, Sora 등)로 직접 제작된 영상물인지 판별하세요. 기존 상업 영화(A.I., 아이로봇 등)의 리뷰, 다큐, 뉴스라면 무조건 ABOUT-AI로 답하세요. 직접 AI로 만든 창작물만 MADE-WITH-AI로 대답하세요." 
+                  },
+                  { role: "user", content: `제목: ${v.title}\n설명: ${v.description}` }
+                ],
+                max_tokens: 10,
+                temperature: 0
+              })
+            });
+            const llmData = await llmRes.json();
+            const answer = llmData.choices?.[0]?.message?.content?.trim();
+            if (answer !== "MADE-WITH-AI") {
+              continue; // Drop if LLM says it's not made with AI
+            }
+          } catch(e) {
+            console.error("LLM Verification Error:", e);
+            continue; // Safely drop if API fails
+          }
+        } else {
+          // If no OpenAI key is set, we can either drop or pass. 
+          // Drop it to keep MVP quality strict as requested.
+          continue; 
+        }
+      }
 
       // Categories
       let category = null;
