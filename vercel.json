@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/fetch-youtube",
-      "schedule": "0 3,15 * * *"
+      "schedule": "0 3 * * *"
     }
   ]
 }
