@@ -24,9 +24,9 @@ export async function GET(req: Request) {
     console.log("Starting YouTube sync cron job...");
     
     // Fetch Movies
-    const movies = await fetchAIVideos("AI movie film cinematic -shorts", 20);
+    const movies = await fetchAIVideos("AI movie", 20);
     // Fetch Dramas
-    const dramas = await fetchAIVideos("AI drama series episode -shorts", 20);
+    const dramas = await fetchAIVideos("AI drama", 20);
     
     const allVideos = [
       ...movies.map(v => ({ ...v, category: "Movie" })),
