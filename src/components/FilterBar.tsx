@@ -4,8 +4,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronDown, Filter, Clock, Flame, Calendar, PlaySquare } from "lucide-react";
 
-const AI_TOOLS = ["All", "Veo", "Pika", "Seedream", "FLUX", "Midjourney"];
-
 const SORT_OPTIONS = [
   { id: "popular", label: "Popular", icon: Flame },
   { id: "latest", label: "Latest", icon: Calendar },
@@ -14,20 +12,12 @@ const SORT_OPTIONS = [
 ];
 
 export function FilterBar({ 
-  onFilterChange, 
   onSortChange 
 }: { 
-  onFilterChange?: (tool: string) => void;
   onSortChange?: (sort: string) => void;
 }) {
-  const [activeTool, setActiveTool] = useState("All");
   const [activeSort, setActiveSort] = useState("popular");
   const [isSortOpen, setIsSortOpen] = useState(false);
-
-  const handleToolClick = (tool: string) => {
-    setActiveTool(tool);
-    if (onFilterChange) onFilterChange(tool);
-  };
 
   const handleSortClick = (sortId: string) => {
     setActiveSort(sortId);
@@ -40,33 +30,10 @@ export function FilterBar({
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row gap-4 justify-between items-center z-20 relative">
       
-      {/* AI Tools Filter (Horizontal Scroll) */}
-      <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide snap-x">
-        <div className="flex items-center gap-2 text-gray-400 mr-2 flex-shrink-0">
-          <Filter className="w-4 h-4" />
-          <span className="text-sm font-medium">Tools</span>
-        </div>
-        {AI_TOOLS.map((tool) => {
-          const isActive = activeTool === tool;
-          return (
-            <button
-              key={tool}
-              onClick={() => handleToolClick(tool)}
-              className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all flex-shrink-0 snap-start
-                ${isActive ? "text-white" : "text-gray-400 hover:text-white glass"}
-              `}
-            >
-              {isActive && (
-                <motion.div
-                  layoutId="filter-active"
-                  className="absolute inset-0 bg-gradient-to-r from-neon-blue/20 to-neon-purple/20 rounded-full border border-neon-blue/50 neon-shadow-blue"
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                />
-              )}
-              <span className="relative z-10">{tool}</span>
-            </button>
-          );
-        })}
+      {/* Left side - We removed the AI tools selector, you can put a title or just leave empty */}
+      <div className="flex items-center gap-2">
+        <Filter className="w-5 h-5 text-neon-blue" />
+        <span className="text-sm font-medium text-gray-300">Sort by</span>
       </div>
 
       {/* Sort Dropdown */}
