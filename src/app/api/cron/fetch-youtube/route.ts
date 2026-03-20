@@ -5,8 +5,16 @@ import { supabase } from "@/lib/supabase";
 export const maxDuration = 60; // Max duration for Vercel Cron
 
 export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const keyParam = searchParams.get("key");
   const authHeader = req.headers.get("authorization");
-  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  
+  const secret = process.env.CRON_SECRET;
+  const isAuthorized = !secret || 
+                       authHeader === `Bearer ${secret}` || 
+                       keyParam === secret;
+
+  if (!isAuthorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
