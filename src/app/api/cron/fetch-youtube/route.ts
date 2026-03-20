@@ -59,10 +59,18 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ 
       success: true, 
-      message: `Synced ${upsertedCount} videos successfully.` 
+      message: `Synced ${upsertedCount} videos successfully.`,
+      debug: {
+        moviesFound: movies.length,
+        dramasFound: dramas.length,
+        totalAttempted: allVideos.length
+      }
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Cron Job Error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ 
+      error: "Internal Server Error", 
+      details: error.message 
+    }, { status: 500 });
   }
 }
