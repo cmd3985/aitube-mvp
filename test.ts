@@ -1,0 +1,1 @@
+import dotenv from 'dotenv'; dotenv.config({ path: '.env.local' }); import { fetchAIVideos } from './src/lib/youtube'; async function run() { try { const res = await fetchAIVideos('AI short film', 10); console.log('Found:', res.length); } catch (e) { console.error(e); } } run();

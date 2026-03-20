@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { fetchAIVideos } from "@/lib/youtube";
 import { supabase } from "@/lib/supabase";
+import LanguageDetect from 'languagedetect';
 
 export const maxDuration = 60; // Max duration for Vercel Cron
 
@@ -23,9 +24,21 @@ export async function GET(req: Request) {
   try {
     console.log("Starting YouTube sync cron job...");
     
-    // Fetch combined keyword videos
-    const searchQuery = "AI film|AI movie|AI generated drama|AI webdrama|AI cinematic|AI short film|AI documentary|#AIFilm|#AI시네마";
-    const rawVideos = await fetchAIVideos(searchQuery, 40);
+    const QUERIES = [
+      { q: "AI short film", lang: "en" },
+      { q: "AI movie", lang: "en" },
+      { q: "court métrage IA", lang: "fr" },
+      { q: "cortometraje de IA", lang: "es" },
+      { q: "curta-metragem de IA", lang: "pt" },
+      { q: "AI 영화", lang: "ko" },
+      { q: "AI 웹드라마", lang: "ko" },
+      { q: "AI 映画", lang: "ja" },
+      { q: "AI 短片", lang: "zh" },
+      { q: "AI लघु फिल्म", lang: "hi" },
+    ];
+    // pick one randomly
+    const pick = QUERIES[Math.floor(Math.random() * QUERIES.length)];
+    const rawVideos = await fetchAIVideos(pick.q, 40, pick.lang);
     
     // Categorize
     const allVideos = [];
@@ -67,23 +80,32 @@ export async function GET(req: Request) {
       }
 
       // Language Inference
+      const detector = new LanguageDetect();
       let language = "영어"; // default
+      
       if (fullText.includes("no dialogue") || fullText.includes("silent") || fullText.includes("bgm") || fullText.includes("music only")) {
         language = "No Dialogue";
-      } else if (/[가-힣]/.test(fullText)) {
-        language = "한국어";
-      } else if (/[ぁ-んァ-ン]/.test(fullText)) {
-        language = "일본어";
-      } else if (/[一-龥]/.test(fullText)) {
-        language = "중국어";
-      } else if (/[\u0900-\u097F]/.test(fullText) || fullText.includes("hindi")) {
-        language = "힌디어";
-      } else if (/\b(el|la|los|las|un|una|es|en|para|con|spanish)\b/.test(fullText)) {
-        language = "스페인어";
-      } else if (/\b(o|a|os|as|um|uma|é|em|para|com|portuguese)\b/.test(fullText)) {
-        language = "포르투갈어";
-      } else if (/\b(le|la|les|un|une|est|et|en|pour|dans|french)\b/.test(fullText)) {
-        language = "프랑스어";
+      } else {
+        // CJK Regex Fast-Path (LanguageDetect struggles with CJK)
+        if (/[가-힣]/.test(fullText)) {
+          language = "한국어";
+        } else if (/[ぁ-んァ-ン]/.test(fullText)) {
+          language = "일본어";
+        } else if (/[\u4e00-\u9fa5]/.test(fullText)) {
+          language = "중국어";
+        } else if (/[\u0900-\u097F]/.test(fullText)) {
+          language = "힌디어";
+        } else {
+          // Use LanguageDetect for Latin-based languages
+          const detected = detector.detect(fullText, 3); // top 3
+          if (detected.length > 0) {
+            const topLang = detected[0][0]; // e.g. "english", "french", "spanish"
+            if (topLang === 'french') language = "프랑스어";
+            else if (topLang === 'spanish') language = "스페인어";
+            else if (topLang === 'portuguese') language = "포르투갈어";
+            else language = "영어"; 
+          }
+        }
       }
 
       allVideos.push({ ...v, category, language });
