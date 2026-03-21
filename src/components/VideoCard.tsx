@@ -22,8 +22,43 @@ export interface VideoProps {
 }
 
 export function VideoCard({ video, onClick }: { video: VideoProps, onClick?: () => void }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [user, setUser] = useState<User | null>(null);
+
+  const getRelativeTime = (dateStr: string) => {
+    // Legacy fallback for pre-migration data
+    if (!dateStr || dateStr.includes("ago")) {
+      return (dateStr || "")
+        .replace(" months ago", " " + t("monthsAgo"))
+        .replace(" days ago", " " + t("daysAgo"))
+        .replace(" hours ago", " " + t("hoursAgo"))
+        .replace(" a month ago", " 1 " + t("monthsAgo"));
+    }
+    
+    // ISO-8601 formatting using native browser Intl
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return dateStr;
+      
+      const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+      const rtfLocale = { "EN": "en", "KO": "ko", "JA": "ja", "ES": "es", "FR": "fr", "PT": "pt", "ZH": "zh", "HI": "hi", "AR": "ar", "ID": "id", "RU": "ru", "DE": "de" }[lang || "EN"] || "en";
+      const rtf = new Intl.RelativeTimeFormat(rtfLocale, { numeric: 'auto' });
+      
+      if (seconds < 60) return rtf.format(-seconds, 'second');
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return rtf.format(-minutes, 'minute');
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return rtf.format(-hours, 'hour');
+      const days = Math.floor(hours / 24);
+      if (days < 30) return rtf.format(-days, 'day');
+      const months = Math.floor(days / 30);
+      if (months < 12) return rtf.format(-months, 'month');
+      const years = Math.floor(days / 365);
+      return rtf.format(-years, 'year');
+    } catch (e) {
+      return dateStr;
+    }
+  };
   const [isDeleted, setIsDeleted] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -203,7 +238,7 @@ export function VideoCard({ video, onClick }: { video: VideoProps, onClick?: () 
             <div className="flex items-center gap-2">
               <span>{video.views.replace(" views", " " + t("views"))}</span>
               <span className="w-1 h-1 rounded-full bg-gray-600" />
-              <span>{video.uploadedAt.replace(" months ago", " " + t("monthsAgo")).replace(" days ago", " " + t("daysAgo")).replace(" hours ago", " " + t("hoursAgo")).replace(" a month ago", " 1 " + t("monthsAgo"))}</span>
+              <span>{getRelativeTime(video.uploadedAt)}</span>
             </div>
           </div>
         </div>
