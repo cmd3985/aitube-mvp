@@ -9,7 +9,9 @@ export async function GET(request: Request) {
   const duration = searchParams.get('duration') || 'All';
   const language = searchParams.get('language') || 'All';
 
-  let query = supabase.from('videos').select('*').eq('status', 'published');
+  // Route strictly to the PostgreSQL view for trending sorting
+  const tableName = sort === 'trending' ? 'trending_videos' : 'videos';
+  let query = supabase.from(tableName).select('*').eq('status', 'published');
 
   // 1. Language Filter
   if (language !== 'All' && language) {
@@ -39,9 +41,8 @@ export async function GET(request: Request) {
   } else if (sort === 'latest') {
     query = query.order('published_at', { ascending: false });
   } else if (sort === 'trending') {
-    // Trending approximation: high views + recent. 
-    // Fallback to views for MVP without custom RPC
-    query = query.order('view_count', { ascending: false });
+    // Queries the dynamically calculated trending_score from the postgres view
+    query = query.order('trending_score', { ascending: false });
   } else if (sort === 'runtime') {
     // String sorting works decently well if no 1h+ exists, 
     // but we add it as an option. (It will sort 59:00 above 1:00:00, MVP limitation accepted)
