@@ -30,6 +30,11 @@ export async function GET(request: Request) {
 
     let deletedCount = 0;
     const deletedIds = [];
+    const debug: any = {
+      dbVidsCount: videos.length,
+      chunksCount: chunks.length,
+      ytErrors: []
+    };
 
     for (const chunk of chunks) {
       const idsParam = chunk.join(',');
@@ -37,6 +42,10 @@ export async function GET(request: Request) {
       const res = await fetch(url);
       const data = await res.json();
 
+      if (data.error) {
+        debug.ytErrors.push(data.error);
+        continue;
+      }
       if (!data.items) continue;
 
       // 1. Delete videos where embedding is disabled
@@ -47,6 +56,8 @@ export async function GET(request: Request) {
           if (!delError) {
             deletedCount++;
             deletedIds.push(item.id + " (Embedding disabled)");
+          } else {
+            console.error("Delete error:", delError);
           }
         }
       }
@@ -68,6 +79,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ 
       success: true,
       message: `청소 완료! 총 ${deletedCount}개의 재생 불가 영상을 삭제했습니다.`,
+      debug,
       deletedIds 
     });
   } catch (error: any) {
