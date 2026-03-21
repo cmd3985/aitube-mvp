@@ -102,8 +102,8 @@ export async function fetchAIVideos(query: string = "AI short film", maxResults:
         const title = snippet.title.toLowerCase();
         const desc = snippet.description.toLowerCase();
         
-        // Quality Control: >= 60 seconds, no #shorts in title/desc
-        const isShort = title.includes("#shorts") || desc.includes("#shorts") || durationSec < 60;
+        // Quality Control: >= 120 seconds (2 minutes), no #shorts in title/desc
+        const isShort = title.includes("#shorts") || desc.includes("#shorts") || durationSec < 120;
         return !isShort;
       })
       .map((item: any) => ({

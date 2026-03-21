@@ -7,12 +7,10 @@ import { useLanguage } from "@/i18n/LanguageContext";
 
 export const DURATIONS = [
   "All", 
-  "Under 10m", 
+  "Under 5m", 
+  "5m - 10m", 
   "10m - 20m", 
-  "20m - 30m", 
-  "30m - 40m", 
-  "40m - 50m", 
-  "1h+"
+  "20m+"
 ];
 export const LANGUAGES = [
   "All",
@@ -53,9 +51,11 @@ export function FilterBar({
 
   const getDurationDisplay = (d: string) => {
     if (d === "All") return t("all");
-    if (d === "Under 10m") return t("under10m");
-    if (d === "1h+") return t("over1h");
-    return d; // keep others as 10m - 20m
+    if (d === "Under 5m") return t("under5m");
+    if (d === "5m - 10m") return t("5mTo10m");
+    if (d === "10m - 20m") return t("10mTo20m");
+    if (d === "20m+") return t("over20m");
+    return d;
   };
 
   const getLangDisplay = (l: string) => {

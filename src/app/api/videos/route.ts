@@ -18,20 +18,18 @@ export async function GET(request: Request) {
 
   // 2. Duration Filter (Schema-less Pattern Matching)
   if (duration !== 'All') {
-    if (duration === 'Under 10m') {
-      // Matches "M:SS" (e.g. 4:20) or "0M:SS" (e.g. 09:12)
-      query = query.or('duration.like._:__,duration.like.0_:__');
+    if (duration === 'Under 5m') {
+      // Matches 0:00 - 4:59 (e.g. 4:20, 04:12)
+      query = query.or('duration.like.0:__,duration.like.1:__,duration.like.2:__,duration.like.3:__,duration.like.4:__,duration.like.00:__,duration.like.01:__,duration.like.02:__,duration.like.03:__,duration.like.04:__');
+    } else if (duration === '5m - 10m') {
+      // Matches 5:00 - 9:59 (e.g. 5:20, 09:12)
+      query = query.or('duration.like.5:__,duration.like.6:__,duration.like.7:__,duration.like.8:__,duration.like.9:__,duration.like.05:__,duration.like.06:__,duration.like.07:__,duration.like.08:__,duration.like.09:__');
     } else if (duration === '10m - 20m') {
+      // Matches 10:00 - 19:59
       query = query.like('duration', '1_:__');
-    } else if (duration === '20m - 30m') {
-      query = query.like('duration', '2_:__');
-    } else if (duration === '30m - 40m') {
-      query = query.like('duration', '3_:__');
-    } else if (duration === '40m - 50m') {
-      query = query.like('duration', '4_:__');
-    } else if (duration === '1h+') {
-      // Matches anything with two colons (e.g. 1:04:20)
-      query = query.like('duration', '%:%:%');
+    } else if (duration === '20m+') {
+      // Matches 20:00+, 30:00+, 40:00+, 50:00+, and anything over 1 hour (HH:MM:SS format)
+      query = query.or('duration.like.2_:__,duration.like.3_:__,duration.like.4_:__,duration.like.5_:__,duration.like.%:%:%');
     }
   }
 

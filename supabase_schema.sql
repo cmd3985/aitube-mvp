@@ -42,3 +42,7 @@ USING ( true );
 
 -- -- 기존 저퀄리티 데이터 클렌징 쿼리 (조회수 1000 미만 & 좋아요 50 미만)
 -- DELETE FROM public.videos WHERE view_count < 1000 AND (like_count IS NULL OR like_count < 50);
+
+-- =========== [마이그레이션 안내 3 - Duration Threshold Update] ===========
+-- 최소 길이 2분(120초) 미달 (0분, 1분대) 기존 스팸 쇼츠 영상 일괄 삭제 쿼리
+-- DELETE FROM public.videos WHERE duration LIKE '00:%' OR duration LIKE '01:%';
