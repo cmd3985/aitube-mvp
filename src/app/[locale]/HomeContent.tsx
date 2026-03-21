@@ -10,11 +10,33 @@ import { useLanguage } from "@/i18n/LanguageContext";
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+
+  const getDefaultLanguageFilter = (l: string) => {
+    switch (l) {
+      case "EN": return "영어";
+      case "KO": return "한국어";
+      case "JA": return "일본어";
+      case "ES": return "스페인어";
+      case "FR": return "프랑스어";
+      case "PT": return "포르투갈어";
+      case "ZH": return "중국어";
+      case "HI": return "힌디어";
+      default: return "영어";
+    }
+  };
+
+  const defaultLangFilter = getDefaultLanguageFilter(lang);
+
   const [activeSort, setActiveSort] = useState("popular");
   const [activeDuration, setActiveDuration] = useState("All");
-  const [activeLanguage, setActiveLanguage] = useState("All");
+  const [activeLanguage, setActiveLanguage] = useState(defaultLangFilter);
   const [selectedVideo, setSelectedVideo] = useState<VideoProps | null>(null);
+
+  // Sync filter when UI language changes
+  useEffect(() => {
+    setActiveLanguage(getDefaultLanguageFilter(lang));
+  }, [lang]);
 
   const observerTarget = useRef<HTMLDivElement>(null);
 
@@ -24,8 +46,10 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
     return `/api/videos?page=${pageIndex + 1}&sort=${activeSort}&duration=${activeDuration}&language=${activeLanguage}`;
   };
 
+  const isDefaultFetch = activeSort === "popular" && activeDuration === "All" && activeLanguage === defaultLangFilter;
+
   const { data, size, setSize, isValidating } = useSWRInfinite(getKey, fetcher, {
-    fallbackData: activeSort === "popular" && activeDuration === "All" && activeLanguage === "All" 
+    fallbackData: isDefaultFetch 
       ? [{ videos: initialVideos, nextPage: initialVideos.length === 24 ? 2 : null }] 
       : undefined,
     revalidateFirstPage: false,

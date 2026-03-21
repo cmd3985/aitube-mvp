@@ -4,10 +4,20 @@ import { HomeContent } from "./HomeContent";
 
 export const revalidate = 0;
 
-export default async function Home() {
+export default async function Home({ params }: { params: Promise<{ locale: string }> | { locale: string } }) {
+  const resolvedParams = await Promise.resolve(params);
+  const locale = resolvedParams.locale;
+
+  const langMap: Record<string, string> = {
+    "en": "영어", "ko": "한국어", "ja": "일본어", "es": "스페인어", 
+    "fr": "프랑스어", "pt": "포르투갈어", "zh": "중국어", "hi": "힌디어"
+  };
+  const dbLang = langMap[locale] || "영어";
+
   const { data: videosFromDb, error } = await supabase
     .from("videos")
     .select("*")
+    .eq('language', dbLang)
     .order("view_count", { ascending: false })
     .limit(24);
 
