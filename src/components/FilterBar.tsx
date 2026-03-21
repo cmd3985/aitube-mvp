@@ -86,8 +86,8 @@ export function FilterBar({
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col gap-4 z-20 relative">
       
       {/* Top Row: Language Filters (Always Full Width) */}
-      <div className="flex items-center gap-2 overflow-x-auto w-full pb-2 md:pb-0 scrollbar-hide snap-x">
-        <div className="flex items-center gap-2 text-gray-400 mr-2 flex-shrink-0">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-3 w-full">
+        <div className="flex items-center gap-2 text-gray-400 mr-2">
           <Globe className="w-4 h-4" />
           <span className="text-sm font-medium">{t("language")}</span>
         </div>
@@ -97,7 +97,7 @@ export function FilterBar({
             <button
               key={lang}
               onClick={() => onLanguageChange && onLanguageChange(lang)}
-              className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all flex-shrink-0 snap-start
+              className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all
                 ${isActive ? "text-white" : "text-gray-400 hover:text-white glass"}
               `}
             >
@@ -118,8 +118,8 @@ export function FilterBar({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
         
         {/* Duration Filters */}
-        <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide snap-x flex-grow">
-          <div className="flex items-center gap-2 text-gray-400 mr-2 flex-shrink-0">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-3 w-full md:w-auto flex-grow">
+          <div className="flex items-center gap-2 text-gray-400 mr-2">
             <Clock className="w-4 h-4" />
             <span className="text-sm font-medium">{t("duration")}</span>
           </div>
@@ -129,7 +129,7 @@ export function FilterBar({
               <button
                 key={dur}
                 onClick={() => onDurationChange && onDurationChange(dur)}
-                className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all flex-shrink-0 snap-start
+                className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all
                   ${isActive ? "text-white" : "text-gray-400 hover:text-white glass"}
                 `}
               >
