@@ -25,16 +25,19 @@ export async function GET(req: Request) {
     console.log("Starting YouTube sync cron job...");
     
     const QUERIES = [
-      { q: "AI short film", lang: "en" },
-      { q: "AI movie", lang: "en" },
-      { q: "court métrage IA", lang: "fr" },
-      { q: "cortometraje de IA", lang: "es" },
-      { q: "curta-metragem de IA", lang: "pt" },
-      { q: "AI 영화", lang: "ko" },
-      { q: "AI 웹드라마", lang: "ko" },
-      { q: "AI 映画", lang: "ja" },
-      { q: "AI 短片", lang: "zh" },
-      { q: "AI लघु फिल्म", lang: "hi" },
+      { q: "AI short film", lang: "en", region: "US" },
+      { q: "AI movie", lang: "en", region: "US" },
+      { q: "court métrage IA", lang: "fr", region: "FR" },
+      { q: "cortometraje de IA", lang: "es", region: "ES" },
+      { q: "curta-metragem de IA", lang: "pt", region: "BR" },
+      { q: "AI 영화", lang: "ko", region: "KR" },
+      { q: "AI 웹드라마", lang: "ko", region: "KR" },
+      { q: "AI 映画", lang: "ja", region: "JP" },
+      { q: "AI短片", lang: "zh", region: "TW" },
+      { q: "AI微电影", lang: "zh", region: "HK" },
+      { q: "AI生成视频", lang: "zh", region: "TW" },
+      { q: "AI शॉर्ट फिल्म", lang: "hi", region: "IN" },
+      { q: "AI फिल्म", lang: "hi", region: "IN" },
     ];
     // Shuffle queries and pick 5 to execute concurrently
     const shuffled = QUERIES.sort(() => 0.5 - Math.random());
@@ -44,7 +47,7 @@ export async function GET(req: Request) {
     const orders: ("relevance" | "date" | "viewCount")[] = ["relevance", "relevance", "viewCount", "date", "date"];
     
     const results = await Promise.all(
-      selected.map((pick, i) => fetchAIVideos(pick.q, 50, pick.lang, orders[i]))
+      selected.map((pick, i) => fetchAIVideos(pick.q, 50, pick.lang, orders[i], pick.region))
     );
     
     const rawVideos = results.flat();
@@ -86,7 +89,7 @@ export async function GET(req: Request) {
         "ending explained", "recap", "movie review", "explained", "summary", "reaction", "how to", "tutorial", // EN
         "ネタバレ", "レビュー", "結末", "解説", "要約", "反応", // JA
         "resumen", "reseña", "final explicado", "crítica", "résumé", "fin expliquée", "resumo", // ES/FR/PT
-        "解说", "影评", "结局", "剧透", "समीक्षा", "स्पष्टीकरण" // ZH/HI
+        "解说", "影评", "结局", "剧透", "解說", "影評", "스포일러", "समीक्षा", "स्पष्टीकरण" // ZH/HI
       ];
       
       const isBlacklisted = blacklist.some(p => fullText.includes(p));
@@ -102,7 +105,7 @@ export async function GET(req: Request) {
         "ai 단편영화", "ai 영화", "ai 웹드라마", "ai 애니메이션", "ai 시네마",
         "ai短編映画", "ai映画", "aiアニメ", "ai生成動画", "フルai映画",
         "cortometraje ai", "cortometraje ia", "película ai", "película ia", "court métrage ia", "film ia", "curta-metragem ia", "filme ia",
-        "ai短片", "ai电影", "ai微电影", "ai शॉर्ट फिल्म", "ai फिल्म"
+        "ai短片", "ai电影", "ai微电影", "ai生成视频", "ai 微電影", "ai 生成視頻", "ai शॉर्ट फिल्म", "ai फिल्म"
       ];
       const isWhitelisted = whitelist.some(p => titleLower.includes(p) || descLower.includes(p));
 

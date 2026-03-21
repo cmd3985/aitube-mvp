@@ -64,14 +64,14 @@ function timeAgo(dateString: string) {
   return Math.floor(seconds) + " seconds ago";
 }
 
-export async function fetchAIVideos(query: string = "AI short film", maxResults: number = 50, relevanceLanguage: string = "en", order: "relevance" | "date" | "viewCount" | "rating" = "relevance"): Promise<YouTubeVideoInfo[]> {
+export async function fetchAIVideos(query: string = "AI short film", maxResults: number = 50, relevanceLanguage: string = "en", order: "relevance" | "date" | "viewCount" | "rating" = "relevance", regionCode: string = "US"): Promise<YouTubeVideoInfo[]> {
   try {
     // 1. Search for videos via /search (videoCategoryId=1 is Film & Animation)
     const exactQuery = query + " -tutorial -how -review -news -podcast -react -scam -vs";
     const searchRes = await fetch(
       `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(
         exactQuery
-      )}&maxResults=${maxResults}&order=${order}&type=video&videoCategoryId=1&relevanceLanguage=${relevanceLanguage}&key=${API_KEY}`
+      )}&maxResults=${maxResults}&order=${order}&type=video&videoCategoryId=1&relevanceLanguage=${relevanceLanguage}&regionCode=${regionCode}&key=${API_KEY}`
     );
 
     if (!searchRes.ok) {
