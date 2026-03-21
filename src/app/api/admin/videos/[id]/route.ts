@@ -12,7 +12,8 @@ export async function DELETE(
     const authClient = await createServerClient();
     const { data: { user } } = await authClient.auth.getUser();
 
-    const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "jumpingkor@gmail.com,mnibsi@gmail.com").split(",");
+    const envEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS || "";
+    const adminEmails = envEmails ? envEmails.split(",").map(e => e.trim()) : [];
 
     if (!user || !user.email || !adminEmails.includes(user.email)) {
       return NextResponse.json(
