@@ -56,7 +56,9 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
     revalidateAll: false,
   });
 
-  const displayedVideos: VideoProps[] = data ? data.flatMap(page => page.videos) : [];
+  const displayedVideos: VideoProps[] = data 
+    ? data.flatMap(page => Array.isArray(page?.videos) ? page.videos : []) 
+    : [];
   const isReachingEnd = data && data[data.length - 1]?.nextPage === null;
 
   // Observer Logic
