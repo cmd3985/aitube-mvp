@@ -1,4 +1,5 @@
 import "server-only";
+import sharp from "sharp";
 
 export interface YouTubeVideoInfo {
   id: string;
@@ -96,36 +97,75 @@ export async function fetchAIVideos(query: string = "AI short film", maxResults:
 
     if (!videoData.items) return [];
 
-    return videoData.items
-      .filter((item: any) => {
+    // Async filter: quality + pillarbox detection
+    const results = await Promise.all(
+      videoData.items.map(async (item: any) => {
         const snippet = item.snippet;
         const durationSec = getDurationSeconds(item.contentDetails.duration);
         const title = snippet.title.toLowerCase();
         const desc = snippet.description.toLowerCase();
-        
-        // Quality Control: >= 120 seconds (2 minutes), no #shorts in title/desc
+
+        // Quality Control: >= 120 seconds (2 minutes), no #shorts
         const isShort = title.includes("#shorts") || desc.includes("#shorts") || durationSec < 120;
-        
-        // Detect vertical (9:16) videos via player embed dimensions
+        if (isShort) return null;
+
+        // Detect vertical (9:16) via player embed dimensions (catches pure vertical uploads)
         const playerWidth = parseInt(item.player?.embedWidth || "1280", 10);
         const playerHeight = parseInt(item.player?.embedHeight || "720", 10);
-        const isVertical = playerHeight > playerWidth;
-        
-        return !isShort && !isVertical;
+        if (playerHeight > playerWidth) return null;
+
+        // Detect pillarboxed vertical content via thumbnail edge pixel analysis
+        const thumbUrl = snippet.thumbnails.high?.url || snippet.thumbnails.default?.url;
+        if (thumbUrl) {
+          try {
+            const thumbRes = await fetch(thumbUrl);
+            const buffer = Buffer.from(await thumbRes.arrayBuffer());
+            const { data, info } = await sharp(buffer).resize(160, 90).raw().toBuffer({ resolveWithObject: true });
+            const { width, height, channels } = info;
+            const edgeWidth = Math.floor(width * 0.12); // check leftmost/rightmost 12%
+            let darkPixels = 0;
+            let totalEdgePixels = 0;
+            for (let y = 0; y < height; y++) {
+              for (let x = 0; x < edgeWidth; x++) {
+                const idx = (y * width + x) * channels;
+                const brightness = (data[idx] + data[idx + 1] + data[idx + 2]) / 3;
+                if (brightness < 30) darkPixels++;
+                totalEdgePixels++;
+              }
+              for (let x = width - edgeWidth; x < width; x++) {
+                const idx = (y * width + x) * channels;
+                const brightness = (data[idx] + data[idx + 1] + data[idx + 2]) / 3;
+                if (brightness < 30) darkPixels++;
+                totalEdgePixels++;
+              }
+            }
+            const darkRatio = darkPixels / totalEdgePixels;
+            if (darkRatio > 0.80) {
+              console.log(`[Pillarbox] Rejected vertical content: "${snippet.title}" (darkRatio=${darkRatio.toFixed(2)})`);
+              return null;
+            }
+          } catch (e) {
+            // If thumbnail analysis fails, allow the video through
+          }
+        }
+
+        return {
+          id: item.id,
+          title: snippet.title,
+          description: snippet.description,
+          thumbnail: snippet.thumbnails.maxres?.url || snippet.thumbnails.high?.url || snippet.thumbnails.default?.url,
+          duration: parseDuration(item.contentDetails.duration),
+          views: formatViews(item.statistics.viewCount || "0"),
+          rawViewCount: parseInt(item.statistics.viewCount || "0", 10) || 0,
+          likeCount: parseInt(item.statistics.likeCount || "0", 10) || 0,
+          commentCount: parseInt(item.statistics.commentCount || "0", 10) || 0,
+          uploadedAt: timeAgo(item.snippet.publishedAt),
+          channelTitle: item.snippet.channelTitle
+        };
       })
-      .map((item: any) => ({
-        id: item.id,
-        title: item.snippet.title,
-        description: item.snippet.description,
-        thumbnail: item.snippet.thumbnails.maxres?.url || item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default?.url,
-        duration: parseDuration(item.contentDetails.duration),
-        views: formatViews(item.statistics.viewCount || "0"),
-        rawViewCount: parseInt(item.statistics.viewCount || "0", 10) || 0,
-        likeCount: parseInt(item.statistics.likeCount || "0", 10) || 0,
-        commentCount: parseInt(item.statistics.commentCount || "0", 10) || 0,
-        uploadedAt: timeAgo(item.snippet.publishedAt),
-        channelTitle: item.snippet.channelTitle
-      }));
+    );
+
+    return results.filter(Boolean) as YouTubeVideoInfo[];
   } catch (error) {
     console.error("YouTube API Error:", error);
     return [];
