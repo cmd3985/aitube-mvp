@@ -44,7 +44,7 @@ export default function PrivacyPolicyPage() {
             <h2 className="text-xl font-semibold mb-3 text-neon-blue">5. 문의처</h2>
             <p>
               개인정보 보호와 관련된 문의사항은 아래 이메일로 연락해 주시기 바랍니다.<br/>
-              이메일: contact@gencine.org
+              이메일: mnibsi@gmail.com
             </p>
           </section>
         </div>
