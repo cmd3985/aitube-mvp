@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { createClient as createServerClient } from '@/utils/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 
 export async function DELETE(
   request: Request,
@@ -7,10 +8,9 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    
-    // 1. Verify Admin Auth
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    // 1. Verify Admin Auth using normal client
+    const authClient = await createServerClient();
+    const { data: { user } } = await authClient.auth.getUser();
 
     const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "jumpingkor@gmail.com,mnibsi@gmail.com").split(",");
 
@@ -21,8 +21,14 @@ export async function DELETE(
       );
     }
 
-    // 2. We must delete any bookmarks referencing this video first (Foreign Key constraint)
-    const { error: bookmarksError } = await supabase
+    // 2. Create Admin Client with Service Role Key to bypass RLS
+    const adminClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+      process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+    );
+
+    // 3. We must delete any bookmarks referencing this video first (Foreign Key constraint)
+    const { error: bookmarksError } = await adminClient
       .from("bookmarks")
       .delete()
       .eq("video_id", id);
@@ -32,11 +38,12 @@ export async function DELETE(
       return NextResponse.json({ error: "Failed to delete related bookmarks." }, { status: 500 });
     }
 
-    // 3. Delete the video from videos table
-    const { error: videoError } = await supabase
+    // 4. Delete the video from videos table
+    const { error: videoError } = await adminClient
       .from("videos")
       .delete()
       .eq("youtube_id", id);
+
       
     if (videoError) {
       console.error("Failed to delete video:", videoError);
