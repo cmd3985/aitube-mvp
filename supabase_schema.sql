@@ -46,3 +46,11 @@ USING ( true );
 -- =========== [마이그레이션 안내 3 - Duration Threshold Update] ===========
 -- 최소 길이 2분(120초) 미달 (0분, 1분대) 기존 스팸 쇼츠 영상 일괄 삭제 쿼리
 -- DELETE FROM public.videos WHERE duration LIKE '00:%' OR duration LIKE '01:%';
+
+-- =========== [마이그레이션 안내 3 - 핫 트렌딩 뷰 추가] ===========
+-- '급상승(Trending)' 정렬을 위한 시간 감가상각 뷰 (HackerNews Gravity Algorithm 적용)
+-- 조회수, 좋아요, 댓글 점수가 아무리 높아도 시간이 지날수록 점수가 깎여 최신 인기 영상이 위로 올라옵니다.
+CREATE OR REPLACE VIEW trending_videos AS
+SELECT *, 
+       (engagement_score / POWER(EXTRACT(EPOCH FROM (NOW() - CAST(published_at AS TIMESTAMPTZ))) / 3600 + 2, 1.5)) AS trending_score
+FROM videos;
