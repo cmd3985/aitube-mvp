@@ -9,6 +9,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     .from('videos')
     .select('*')
     .eq('youtube_id', id)
+    .eq('status', 'published')
     .single();
 
   if (error || !video) {

@@ -19,7 +19,7 @@ const API_KEY = process.env.YOUTUBE_API_KEY || "AIzaSyDI6God8EP2mVf6P9Tz7s4mbuDX
 const BASE_URL = "https://www.googleapis.com/youtube/v3";
 
 // Parse ISO 8601 duration (e.g. PT1H2M10S -> 01:02:10 or 02:10)
-function parseDuration(pt: string) {
+export function parseDuration(pt: string) {
   const match = pt.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
   if (!match) return "00:00";
   const h = parseInt(match[1] || "0");

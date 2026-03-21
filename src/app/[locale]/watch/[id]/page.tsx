@@ -8,6 +8,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     .from("videos")
     .select("title, description, thumbnail_url")
     .eq("youtube_id", id)
+    .eq('status', 'published')
     .single();
 
   return {
@@ -29,6 +30,7 @@ export default async function WatchPage({ params }: { params: Promise<{ id: stri
     .from("videos")
     .select("*")
     .eq("youtube_id", id)
+    .eq('status', 'published')
     .single();
 
   if (error || !video) {
@@ -44,6 +46,7 @@ export default async function WatchPage({ params }: { params: Promise<{ id: stri
   const { data: recommended } = await supabase
     .from("videos")
     .select("*")
+    .eq('status', 'published')
     .neq("youtube_id", id)
     .eq("language", videoLang)
     .order("engagement_score", { ascending: false })

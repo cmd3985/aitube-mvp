@@ -18,6 +18,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   const { data: videosFromDb, error } = await supabase
     .from("videos")
     .select("*")
+    .eq('status', 'published')
     .eq('language', dbLang)
     .order("engagement_score", { ascending: false })
     .limit(24);

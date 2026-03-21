@@ -9,7 +9,7 @@ export async function GET(request: Request) {
   const duration = searchParams.get('duration') || 'All';
   const language = searchParams.get('language') || 'All';
 
-  let query = supabase.from('videos').select('*');
+  let query = supabase.from('videos').select('*').eq('status', 'published');
 
   // 1. Language Filter
   if (language !== 'All' && language) {

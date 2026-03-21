@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Globe, User, LogOut, Bookmark } from "lucide-react";
+import { Home, Globe, User, LogOut, Bookmark, Film } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { SupportedLanguage } from "@/i18n/dictionaries";
@@ -124,7 +124,15 @@ export function GNB() {
             </div>
 
             {/* Auth Section */}
-            <div className="relative flex items-center">
+            <div className="relative flex items-center gap-2">
+              <Link 
+                href={`/${lang.toLowerCase()}/submit`}
+                className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-sm font-medium text-gray-300 hover:text-white"
+              >
+                <Film className="w-4 h-4 text-neon-purple" />
+                {t("submitFilm")}
+              </Link>
+            
               {!authChecking && !user && (
                 <div className="group relative">
                   <button
