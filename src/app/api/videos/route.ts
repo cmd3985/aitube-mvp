@@ -59,6 +59,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  const formatViews = (num: number) => {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + "M views";
+    if (num >= 1000) return (num / 1000).toFixed(1) + "K views";
+    return num + " views";
+  };
+
   // Format the output
   const payload = (data || []).map(v => ({
     id: v.youtube_id,
@@ -66,7 +72,7 @@ export async function GET(request: Request) {
     description: v.description || "",
     thumbnail: v.thumbnail_url,
     duration: v.duration,
-    views: v.view_count.toString() + " views",
+    views: formatViews(v.view_count),
     uploadedAt: v.published_at, 
     rawDate: v.published_at,
     channelTitle: v.channel_title || "Unknown Channel",

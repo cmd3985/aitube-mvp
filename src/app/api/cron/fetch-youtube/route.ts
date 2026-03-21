@@ -193,8 +193,6 @@ export async function GET(req: Request) {
       if (textForTags.includes("flux")) tools.push("FLUX");
       if (textForTags.includes("midjourney")) tools.push("Midjourney");
       
-      const viewCountInt = parseInt(video.views.replace(/\D/g, "")) || 0;
-
       const { error: upsertError } = await supabase
         .from("videos")
         .upsert({
@@ -203,7 +201,7 @@ export async function GET(req: Request) {
           description: video.description,
           thumbnail_url: video.thumbnail,
           duration: video.duration,
-          view_count: viewCountInt,
+          view_count: video.rawViewCount,
           category: video.category,
           published_at: video.uploadedAt,
           ai_tool_tags: tools,

@@ -25,13 +25,19 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
     console.error("Error fetching videos:", error);
   }
 
+  const formatViews = (num: number) => {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + "M views";
+    if (num >= 1000) return (num / 1000).toFixed(1) + "K views";
+    return num + " views";
+  };
+
   const initialVideos = (videosFromDb || []).map(v => ({
     id: v.youtube_id,
     title: v.title,
     description: v.description || "",
     thumbnail: v.thumbnail_url,
     duration: v.duration,
-    views: v.view_count.toString() + " views",
+    views: formatViews(v.view_count),
     uploadedAt: v.published_at, // this actually is ISO string but formatted later? Wait, timeAgo is done in fetch, so it's a string like "5 months ago".
     rawDate: v.published_at,
     channelTitle: v.channel_title || "Unknown Channel",
