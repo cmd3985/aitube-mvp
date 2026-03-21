@@ -3,15 +3,51 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Globe } from "lucide-react";
-import { useState } from "react";
+import { Home, Globe, User, LogOut, Bookmark } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { SupportedLanguage } from "@/i18n/dictionaries";
+import { createClient } from "@/utils/supabase/client";
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 export function GNB() {
   const pathname = usePathname();
   const { lang, setLang, t } = useLanguage();
   const [langOpen, setLangOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [authChecking, setAuthChecking] = useState(true);
+
+  const supabase = createClient();
+
+  useEffect(() => {
+    // Initial fetch
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setAuthChecking(false);
+    });
+
+    // Listen for changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase.auth]);
+
+  const handleLogin = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUserMenuOpen(false);
+  };
 
   const navItems = [
     { name: t("home"), path: "/", icon: Home },
@@ -27,7 +63,7 @@ export function GNB() {
               GenCine
             </span>
           </a>
-          <nav className="flex items-center gap-6">
+          <nav className="flex items-center gap-4 sm:gap-6">
             {navItems.map((item) => {
               const isActive = pathname === item.path;
               const Icon = item.icon;
@@ -40,7 +76,7 @@ export function GNB() {
                   }`}
                 >
                   <Icon className="w-4 h-4" />
-                  {item.name}
+                  <span className="hidden sm:inline">{item.name}</span>
                   {isActive && (
                     <motion.div
                       layoutId="gnb-active"
@@ -53,13 +89,13 @@ export function GNB() {
             })}
 
             {/* Language Switcher */}
-            <div className="relative">
+            <div className="relative z-50">
               <button
                 onClick={() => setLangOpen(!langOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 hover:border-neon-blue/50 hover:bg-white/5 transition-all text-sm font-medium"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 hover:border-neon-blue/50 hover:bg-white/5 transition-all text-sm font-medium relative"
               >
                 <Globe className="w-4 h-4 text-neon-blue" />
-                {lang}
+                <span className="hidden sm:inline">{lang}</span>
               </button>
               
               <AnimatePresence>
@@ -72,12 +108,12 @@ export function GNB() {
                   >
                     {languages.map(l => (
                       <button
-                        key={l}
-                        onClick={() => {
-                          setLang(l);
-                          setLangOpen(false);
-                        }}
-                        className={`text-left px-4 py-2 text-sm hover:bg-white/10 transition-colors ${lang === l ? "text-neon-blue font-bold" : "text-gray-300"}`}
+                         key={l}
+                         onClick={() => {
+                           setLang(l);
+                           setLangOpen(false);
+                         }}
+                         className={`text-left px-4 py-2 text-sm hover:bg-white/10 transition-colors ${lang === l ? "text-neon-blue font-bold" : "text-gray-300"}`}
                       >
                         {l}
                       </button>
@@ -85,6 +121,70 @@ export function GNB() {
                   </motion.div>
                 )}
               </AnimatePresence>
+            </div>
+
+            {/* Auth Section */}
+            <div className="relative flex items-center">
+              {!authChecking && !user && (
+                <div className="group relative">
+                  <button
+                    onClick={handleLogin}
+                    className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-neon-blue/20 to-neon-purple/20 border border-neon-blue/50 hover:from-neon-blue/40 hover:to-neon-purple/40 hover:shadow-[0_0_15px_rgba(0,242,254,0.4)] transition-all text-sm font-medium text-white"
+                  >
+                    {t("loginGoogle")}
+                  </button>
+                  {/* Tooltip */}
+                  <div className="absolute top-full mt-3 right-0 w-max max-w-[200px] sm:max-w-xs p-2.5 rounded-lg bg-zinc-900 border border-white/10 shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300 z-50">
+                    <p className="text-xs text-center text-gray-200">{t("loginTooltip")}</p>
+                    <div className="absolute -top-1.5 right-6 w-3 h-3 bg-zinc-900 border-t border-l border-white/10 transform rotate-45"></div>
+                  </div>
+                </div>
+              )}
+
+              {!authChecking && user && (
+                <div className="relative">
+                  <button
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-cyan-400 transition-colors focus:outline-none"
+                  >
+                    {user.user_metadata?.avatar_url ? (
+                      <img src={user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-zinc-800 flex flex-col items-center justify-center">
+                        <User className="w-4 h-4 text-gray-400" />
+                      </div>
+                    )}
+                  </button>
+                  
+                  <AnimatePresence>
+                    {userMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute right-0 mt-2 w-48 py-2 glass rounded-xl border border-white/10 shadow-[0_0_15px_rgba(0,0,0,0.5)] z-50 flex flex-col overflow-hidden"
+                      >
+                        <Link 
+                          href={`/${lang.toLowerCase()}/my-list`}
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-200 hover:bg-white/10 hover:text-white transition-colors"
+                        >
+                          <Bookmark className="w-4 h-4 text-neon-blue" />
+                          {t("myList")}
+                        </Link>
+                        <div className="h-px bg-white/10 my-1 flex-shrink-0" />
+                        <button
+                          onClick={handleLogout}
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-red-500/20 hover:text-red-400 transition-colors text-left"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          {t("logout")}
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
             </div>
           </nav>
         </div>
