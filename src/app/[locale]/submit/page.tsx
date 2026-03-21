@@ -62,7 +62,7 @@ export default function SubmitPage() {
             {t("submitFilm")}
           </h1>
           <p className="text-gray-400 mb-10 max-w-sm text-sm leading-relaxed">
-            Showcase your hidden AI masterpiece to the global audience. Approvals usually take 24-48 hours.
+            {t("submitDesc")}
           </p>
 
           {success ? (
