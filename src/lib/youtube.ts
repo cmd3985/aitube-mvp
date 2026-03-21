@@ -199,7 +199,7 @@ export async function fetchAIVideos(query: string = "AI short film", maxResults:
           rawViewCount: parseInt(item.statistics.viewCount || "0", 10) || 0,
           likeCount: parseInt(item.statistics.likeCount || "0", 10) || 0,
           commentCount: parseInt(item.statistics.commentCount || "0", 10) || 0,
-          uploadedAt: timeAgo(item.snippet.publishedAt),
+          uploadedAt: item.snippet.publishedAt, // Raw ISO-8601 for accurate DB sorting
           channelTitle: item.snippet.channelTitle
         };
       })
