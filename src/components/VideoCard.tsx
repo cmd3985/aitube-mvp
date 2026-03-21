@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Heart, X, LogIn } from "lucide-react";
+import { Play, Heart, X, LogIn, Bookmark } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
