@@ -43,7 +43,7 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
   // SWR Infinite Pagination
   const getKey = (pageIndex: number, previousPageData: any) => {
     if (previousPageData && !previousPageData.nextPage) return null; // Reached end
-    return `/api/videos?page=${pageIndex + 1}&sort=${activeSort}&duration=${activeDuration}&language=${activeLanguage}`;
+    return `/api/videos?page=${pageIndex + 1}&sort=${activeSort}&duration=${encodeURIComponent(activeDuration)}&language=${encodeURIComponent(activeLanguage)}`;
   };
 
   const isDefaultFetch = activeSort === "popular" && activeDuration === "All" && activeLanguage === defaultLangFilter;

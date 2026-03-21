@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     } else if (duration === '10m - 20m') {
       // Matches 10:00 - 19:59
       query = query.like('duration', '1_:__');
-    } else if (duration === '20m+') {
+    } else if (duration === '20m+' || duration === '20m ') {
       // Matches 20:00+, 30:00+, 40:00+, 50:00+, and anything over 1 hour (HH:MM:SS format)
       query = query.or('duration.like.2_:__,duration.like.3_:__,duration.like.4_:__,duration.like.5_:__,duration.like.%:%:%');
     }
