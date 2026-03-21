@@ -107,7 +107,8 @@ export function VideoCard({ video, onClick }: { video: VideoProps, onClick?: () 
     });
   };
 
-  const isAdmin = user?.email === "jumpingkor@gmail.com" || user?.email === "mnibsi@gmail.com";
+  const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "jumpingkor@gmail.com,mnibsi@gmail.com").split(",");
+  const isAdmin = user?.email && adminEmails.includes(user.email);
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault();

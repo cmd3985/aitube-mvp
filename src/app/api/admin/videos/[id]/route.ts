@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 
-const ADMIN_EMAILS = [
-  "jumpingkor@gmail.com",
-  "mnibsi@gmail.com", // From your screenshots
-];
-
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -17,7 +12,9 @@ export async function DELETE(
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user || !user.email || !ADMIN_EMAILS.includes(user.email)) {
+    const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "jumpingkor@gmail.com,mnibsi@gmail.com").split(",");
+
+    if (!user || !user.email || !adminEmails.includes(user.email)) {
       return NextResponse.json(
         { error: "Unauthorized. Admin access required." },
         { status: 403 }
