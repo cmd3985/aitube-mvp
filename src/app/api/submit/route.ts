@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     }
 
     // Fetch YT metadata directly
-    const ytRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=snippet,contentDetails,statistics&key=${YOUTUBE_API_KEY}`);
+    const ytRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=snippet,contentDetails,statistics,status&key=${YOUTUBE_API_KEY}`);
     const ytData = await ytRes.json();
     
     if (!ytData.items || ytData.items.length === 0) {
@@ -47,6 +47,11 @@ export async function POST(request: Request) {
     }
     
     const item = ytData.items[0];
+    
+    // Reject if not embeddable
+    if (item.status && item.status.embeddable === false) {
+      return NextResponse.json({ error: 'This video does not allow embedding on other websites. Please enable embedding in YouTube settings.' }, { status: 400 });
+    }
     const snippet = item.snippet;
     const stats = item.statistics;
     const content = item.contentDetails;

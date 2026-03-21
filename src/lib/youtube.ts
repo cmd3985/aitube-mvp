@@ -88,12 +88,12 @@ export async function fetchAIVideos(query: string = "AI short film", maxResults:
     
     // 2. Fetch video details via /videos to get duration, stats, high-res snippet
     // Include player part to detect vertical (9:16) videos
-    const videoRes = await fetch(
-      `${BASE_URL}/videos?part=snippet,contentDetails,statistics,player&id=${videoIds}&key=${API_KEY}`,
+    const detailsRes = await fetch(
+      `${BASE_URL}/videos?part=snippet,contentDetails,statistics,player,status&id=${videoIds}&key=${API_KEY}`,
       { next: { revalidate: 3600 } }
     );
-    if (!videoRes.ok) throw new Error("Failed to fetch video details");
-    const videoData = await videoRes.json();
+    if (!detailsRes.ok) throw new Error("Failed to fetch video details");
+    const videoData = await detailsRes.json();
 
     if (!videoData.items) return [];
 
@@ -108,6 +108,9 @@ export async function fetchAIVideos(query: string = "AI short film", maxResults:
         // Quality Control: >= 120 seconds (2 minutes), no #shorts
         const isShort = title.includes("#shorts") || desc.includes("#shorts") || durationSec < 120;
         if (isShort) return null;
+        
+        // Ensure video is embeddable
+        if (item.status && item.status.embeddable === false) return null;
 
         // Detect vertical (9:16) via player embed dimensions (catches pure vertical uploads)
         const playerWidth = parseInt(item.player?.embedWidth || "1280", 10);
