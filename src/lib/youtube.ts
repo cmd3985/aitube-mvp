@@ -68,7 +68,7 @@ export async function fetchAIVideos(query: string = "AI short film", maxResults:
     const searchRes = await fetch(
       `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(
         exactQuery
-      )}&maxResults=${maxResults}&type=video&videoCategoryId=1&relevanceLanguage=${relevanceLanguage}&key=${API_KEY}`
+      )}&maxResults=${maxResults}&order=date&type=video&videoCategoryId=1&relevanceLanguage=${relevanceLanguage}&key=${API_KEY}`
     );
 
     if (!searchRes.ok) {

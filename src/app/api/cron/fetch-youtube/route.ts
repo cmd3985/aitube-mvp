@@ -38,7 +38,7 @@ export async function GET(req: Request) {
     ];
     // pick one randomly
     const pick = QUERIES[Math.floor(Math.random() * QUERIES.length)];
-    const rawVideos = await fetchAIVideos(pick.q, 40, pick.lang);
+    const rawVideos = await fetchAIVideos(pick.q, 50, pick.lang);
     
     // Categorize
     const allVideos = [];
@@ -194,15 +194,13 @@ export async function GET(req: Request) {
       }
     }
 
-    const moviesFound = allVideos.filter(v => v.category === "Movie").length;
-    const dramasFound = allVideos.filter(v => v.category === "Drama").length;
+    const cinemaFound = allVideos.filter(v => v.category === "Cinema").length;
 
     return NextResponse.json({ 
       success: true, 
       message: `Synced ${upsertedCount} videos.`,
       debug: {
-        moviesFound,
-        dramasFound,
+        cinemaFound,
         totalAttempted: allVideos.length,
         supabaseError: firstError
       }
