@@ -4,8 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import useSWRInfinite from 'swr/infinite';
 import { FilterBar } from "@/components/FilterBar";
 import { VideoCard, VideoProps } from "@/components/VideoCard";
-import { X, Loader } from "lucide-react";
+import { Loader } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
+import Link from "next/link";
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
@@ -31,7 +32,6 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
   const [activeSort, setActiveSort] = useState("popular");
   const [activeDuration, setActiveDuration] = useState("All");
   const [activeLanguage, setActiveLanguage] = useState(defaultLangFilter);
-  const [selectedVideo, setSelectedVideo] = useState<VideoProps | null>(null);
 
   // Sync filter when UI language changes
   useEffect(() => {
@@ -96,15 +96,15 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {displayedVideos.map((video) => (
-                <VideoCard 
-                  key={video.id} 
-                  video={{
-                    ...video,
-                    isDrama: video.title.toLowerCase().includes("episode") || video.title.toLowerCase().includes("ep."),
-                    episode: video.title.toLowerCase().includes("ep.") ? 1 : undefined
-                  }} 
-                  onClick={() => setSelectedVideo(video)}
-                />
+                <Link key={video.id} href={`/${lang.toLowerCase()}/watch/${video.id}`}>
+                  <VideoCard 
+                    video={{
+                      ...video,
+                      isDrama: video.title.toLowerCase().includes("episode") || video.title.toLowerCase().includes("ep."),
+                      episode: video.title.toLowerCase().includes("ep.") ? 1 : undefined
+                    }} 
+                  />
+                </Link>
               ))}
             </div>
             
@@ -119,34 +119,6 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
           </>
         )}
       </div>
-
-      {/* Video Modal Player */}
-      {selectedVideo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
-          <div 
-            className="absolute inset-0 cursor-pointer" 
-            onClick={() => setSelectedVideo(null)}
-          />
-          <div 
-            className="relative w-full aspect-video rounded-2xl overflow-hidden glass border-neon-blue/50 shadow-[0_0_50px_rgba(0,242,254,0.15)] animate-in fade-in zoom-in duration-300"
-            style={{ maxWidth: "min(72rem, calc((100vh - 40px) * 16 / 9))" }}
-          >
-            <button
-              onClick={() => setSelectedVideo(null)}
-              className="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 hover:bg-neon-purple/80 text-white transition-colors border border-white/10"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <iframe
-              src={`https://www.youtube.com/embed/${selectedVideo.id}?autoplay=1&rel=0`}
-              title={selectedVideo.title}
-              className="w-full h-full border-0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-              allowFullScreen
-            />
-          </div>
-        </div>
-      )}
     </main>
   );
 }
