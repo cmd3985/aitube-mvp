@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { dictionaries, SupportedLanguage } from "./dictionaries";
 
 interface LanguageContextType {
@@ -15,35 +16,43 @@ const LanguageContext = createContext<LanguageContextType>({
   t: (key) => key,
 });
 
-export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
-  const [lang, setLang] = useState<SupportedLanguage>("EN");
+export const LanguageProvider = ({ 
+  children, 
+  initialLocale 
+}: { 
+  children: React.ReactNode, 
+  initialLocale?: string 
+}) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  
+  const defaultLang = (initialLocale?.toUpperCase() as SupportedLanguage) || "EN";
+  const [lang, setLangState] = useState<SupportedLanguage>(defaultLang);
 
-  // Load from local storage on mount
+  // Sync state if server prop changes
   useEffect(() => {
-    const saved = localStorage.getItem("aitube-lang") as SupportedLanguage;
-    if (saved && Object.keys(dictionaries).includes(saved)) {
-      setLang(saved);
-    } else {
-      // Basic auto-detect Korean if browser says Korean
-      const browserLang = navigator.language;
-      if (browserLang.toLowerCase().includes("ko")) setLang("KO");
-      else if (browserLang.toLowerCase().includes("ja")) setLang("JA");
-      else if (browserLang.toLowerCase().includes("zh")) setLang("ZH");
-      else if (browserLang.toLowerCase().includes("es")) setLang("ES");
-      else if (browserLang.toLowerCase().includes("pt")) setLang("PT");
-      else if (browserLang.toLowerCase().includes("fr")) setLang("FR");
-      else if (browserLang.toLowerCase().includes("hi")) setLang("HI");
-      else setLang("EN");
+    if (initialLocale) {
+      setLangState(initialLocale.toUpperCase() as SupportedLanguage);
     }
-  }, []);
+  }, [initialLocale]);
 
   const changeLang = (newLang: SupportedLanguage) => {
-    setLang(newLang);
-    localStorage.setItem("aitube-lang", newLang);
+    setLangState(newLang);
+    // Persist via cookie for the middleware to pick up instantly
+    document.cookie = `NEXT_LOCALE=${newLang.toLowerCase()}; path=/; max-age=31536000`;
+    
+    // Replace the locale segment in the URL routing
+    const pathParts = pathname.split("/");
+    if (pathParts.length >= 2) {
+      pathParts[1] = newLang.toLowerCase(); // pathParts[1] is the locale folder since it always starts with /
+      router.push(pathParts.join("/"));
+    } else {
+      router.push(`/${newLang.toLowerCase()}`);
+    }
   };
 
   const t = (key: string): string => {
-    return dictionaries[lang][key] || key;
+    return dictionaries[lang]?.[key] || key;
   };
 
   return (

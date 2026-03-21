@@ -19,18 +19,22 @@ export const metadata: Metadata = {
 import { GNB } from "@/components/GNB";
 import { LanguageProvider } from "@/i18n/LanguageContext";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
-}: Readonly<{
+  params
+}: {
   children: React.ReactNode;
-}>) {
+  params: Promise<{ locale: string }> | { locale: string };
+}) {
+  const resolvedParams = await Promise.resolve(params);
+  const locale = resolvedParams.locale;
   return (
     <html
-      lang="en"
+      lang={locale}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-black overflow-x-hidden">
-        <LanguageProvider>
+        <LanguageProvider initialLocale={locale}>
           <GNB />
           <main className="flex-grow pt-16">
             {children}
