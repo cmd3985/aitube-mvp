@@ -33,3 +33,12 @@ USING ( true );
 -- 기존 테이블이 있다면 아래 쿼리를 추가로 실행해서 컬럼을 추가해주세요!
 -- ALTER TABLE public.videos ADD COLUMN channel_title TEXT DEFAULT 'Unknown';
 -- ALTER TABLE public.videos ADD COLUMN language TEXT DEFAULT 'Unknown';
+
+-- =========== [마이그레이션 안내 2 - Engagement Update] ===========
+-- 프리미엄 QC 및 인게이지먼트 점수 산정을 위한 신규 컬럼 추가 및 클렌징
+-- ALTER TABLE public.videos ADD COLUMN like_count INTEGER DEFAULT 0;
+-- ALTER TABLE public.videos ADD COLUMN comment_count INTEGER DEFAULT 0;
+-- ALTER TABLE public.videos ADD COLUMN engagement_score INTEGER DEFAULT 0;
+
+-- -- 기존 저퀄리티 데이터 클렌징 쿼리 (조회수 1000 미만 & 좋아요 50 미만)
+-- DELETE FROM public.videos WHERE view_count < 1000 AND (like_count IS NULL OR like_count < 50);

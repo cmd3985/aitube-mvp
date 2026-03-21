@@ -55,6 +55,15 @@ export async function GET(req: Request) {
       const descLower = v.description.toLowerCase();
       const fullText = (titleLower + " " + descLower);
 
+      // --- STEP 0: Quality Control (QC) Defense ---
+      // Requirement: Drop if views < 1000 AND likes < 50
+      if (v.rawViewCount < 1000 && v.likeCount < 50) {
+        continue; // Immediate discard
+      }
+
+      // Compute Engagement Score
+      const engagementScore = v.rawViewCount + (v.likeCount * 20) + (v.commentCount * 50);
+
       // --- STEP 1: Multi-lingual Blacklist (Drop, Cost 0) ---
       const blacklist = [
         "결말포함", "영화리뷰", "명작", "요약", "몰아보기", "스포", "평론", // KO
@@ -153,7 +162,7 @@ export async function GET(req: Request) {
         }
       }
 
-      allVideos.push({ ...v, category, language });
+      allVideos.push({ ...v, category, language, engagementScore });
     }
 
     let upsertedCount = 0;
@@ -184,6 +193,9 @@ export async function GET(req: Request) {
           ai_tool_tags: tools,
           channel_title: video.channelTitle,
           language: video.language,
+          like_count: video.likeCount,
+          comment_count: video.commentCount,
+          engagement_score: video.engagementScore,
         }, { onConflict: "youtube_id" });
 
       if (upsertError) {

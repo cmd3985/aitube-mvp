@@ -18,7 +18,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
     .from("videos")
     .select("*")
     .eq('language', dbLang)
-    .order("view_count", { ascending: false })
+    .order("engagement_score", { ascending: false })
     .limit(24);
 
   if (error) {

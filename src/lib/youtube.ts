@@ -7,6 +7,9 @@ export interface YouTubeVideoInfo {
   thumbnail: string;
   duration: string;
   views: string;
+  rawViewCount: number;
+  likeCount: number;
+  commentCount: number;
   uploadedAt: string;
   channelTitle: string;
 }
@@ -110,6 +113,9 @@ export async function fetchAIVideos(query: string = "AI short film", maxResults:
         thumbnail: item.snippet.thumbnails.maxres?.url || item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default?.url,
         duration: parseDuration(item.contentDetails.duration),
         views: formatViews(item.statistics.viewCount || "0"),
+        rawViewCount: parseInt(item.statistics.viewCount || "0", 10) || 0,
+        likeCount: parseInt(item.statistics.likeCount || "0", 10) || 0,
+        commentCount: parseInt(item.statistics.commentCount || "0", 10) || 0,
         uploadedAt: timeAgo(item.snippet.publishedAt),
         channelTitle: item.snippet.channelTitle
       }));

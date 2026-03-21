@@ -37,7 +37,7 @@ export async function GET(request: Request) {
 
   // 3. Sorting
   if (sort === 'popular') {
-    query = query.order('view_count', { ascending: false });
+    query = query.order('engagement_score', { ascending: false });
   } else if (sort === 'latest') {
     query = query.order('published_at', { ascending: false });
   } else if (sort === 'trending') {
