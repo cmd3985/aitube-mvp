@@ -38,6 +38,14 @@ export async function GET(req: Request) {
       { q: "AI生成视频", lang: "zh", region: "TW" },
       { q: "AI शॉर्ट फिल्म", lang: "hi", region: "IN" },
       { q: "AI फिल्म", lang: "hi", region: "IN" },
+      { q: "فيلم قصير بالذكاء الاصطناعي", lang: "ar", region: "AE" },
+      { q: "فيلم ذكاء اصطناعي", lang: "ar", region: "AE" },
+      { q: "film pendek AI", lang: "id", region: "ID" },
+      { q: "film AI", lang: "id", region: "ID" },
+      { q: "ИИ короткометражный фильм", lang: "ru", region: "RU" },
+      { q: "ИИ фильм", lang: "ru", region: "RU" },
+      { q: "KI Kurzfilm", lang: "de", region: "DE" },
+      { q: "KI Film", lang: "de", region: "DE" },
     ];
     // Shuffle queries and pick 5 to execute concurrently
     const shuffled = QUERIES.sort(() => 0.5 - Math.random());
@@ -89,7 +97,11 @@ export async function GET(req: Request) {
         "ending explained", "recap", "movie review", "explained", "summary", "reaction", "how to", "tutorial", // EN
         "ネタバレ", "レビュー", "結末", "解説", "要約", "反応", // JA
         "resumen", "reseña", "final explicado", "crítica", "résumé", "fin expliquée", "resumo", // ES/FR/PT
-        "解说", "影评", "结局", "剧透", "解說", "影評", "스포일러", "समीक्षा", "स्पष्टीकरण" // ZH/HI
+        "解说", "影评", "结局", "剧透", "解說", "影評", "스포일러", "समीक्षा", "स्पष्टीकरण", // ZH/HI/KO
+        "مراجعة فيلم", "نهاية مشروحة", "الجزء", "ملخص", "شرح", // AR
+        "ulasan film", "penjelasan akhir", "alur cerita", "review", // ID
+        "обзор фильма", "концовка объяснение", "краткий пересказ", "объяснение", // RU
+        "filmkritik", "ende erklärt", "zusammenfassung", "erklärung" // DE
       ];
       
       const isBlacklisted = blacklist.some(p => fullText.includes(p));
@@ -105,7 +117,10 @@ export async function GET(req: Request) {
         "ai 단편영화", "ai 영화", "ai 웹드라마", "ai 애니메이션", "ai 시네마",
         "ai短編映画", "ai映画", "aiアニメ", "ai生成動画", "フルai映画",
         "cortometraje ai", "cortometraje ia", "película ai", "película ia", "court métrage ia", "film ia", "curta-metragem ia", "filme ia",
-        "ai短片", "ai电影", "ai微电影", "ai生成视频", "ai 微電影", "ai 生成視頻", "ai शॉर्ट फिल्म", "ai फिल्म"
+        "ai短片", "ai电影", "ai微电影", "ai生成视频", "ai 微電影", "ai 生成視頻", "ai शॉर्ट फिल्म", "ai फिल्म",
+        "فيلم قصير بالذكاء الاصطناعي", "فيلم ذكاء اصطناعي",
+        "film pendek ai", "film ai",
+        "ии короткометражный фильм", "ии фильм", "ki kurzfilm", "ki film"
       ];
       const isWhitelisted = whitelist.some(p => titleLower.includes(p) || descLower.includes(p));
 

@@ -16,7 +16,7 @@ export function GNB() {
   const navItems = [
     { name: t("home"), path: "/", icon: Home },
   ];
-  const languages: SupportedLanguage[] = ["EN", "KO", "JA", "ES", "FR", "PT", "ZH", "HI"];
+  const languages: SupportedLanguage[] = ["EN", "KO", "JA", "ES", "FR", "PT", "ZH", "HI", "AR", "ID", "RU", "DE"];
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass">

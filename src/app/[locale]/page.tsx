@@ -10,7 +10,8 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
 
   const langMap: Record<string, string> = {
     "en": "영어", "ko": "한국어", "ja": "일본어", "es": "스페인어", 
-    "fr": "프랑스어", "pt": "포르투갈어", "zh": "중국어", "hi": "힌디어"
+    "fr": "프랑스어", "pt": "포르투갈어", "zh": "중국어", "hi": "힌디어",
+    "ar": "아랍어", "id": "인도네시아어", "ru": "러시아어", "de": "독일어"
   };
   const dbLang = langMap[locale] || "영어";
 
