@@ -3,13 +3,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Globe, ChevronDown, Filter, Clock, Flame, Calendar, PlaySquare } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageContext";
 
-const SORT_OPTIONS = [
-  { id: "popular", label: "Popular", icon: Flame },
-  { id: "latest", label: "Latest", icon: Calendar },
-  { id: "trending", label: "Trending", icon: PlaySquare },
-  { id: "runtime", label: "Runtime", icon: Clock },
-];
 export const DURATIONS = [
   "All", 
   "Under 10m", 
@@ -45,8 +40,33 @@ export function FilterBar({
   activeLanguage?: string;
   onLanguageChange?: (lang: string) => void;
 }) {
+  const { t } = useLanguage();
   const [activeSort, setActiveSort] = useState("popular");
   const [isSortOpen, setIsSortOpen] = useState(false);
+
+  const SORT_OPTIONS = [
+    { id: "popular", label: t("popular"), icon: Flame },
+    { id: "latest", label: t("latest"), icon: Calendar },
+    { id: "trending", label: t("trending"), icon: PlaySquare },
+    { id: "runtime", label: t("runtime"), icon: Clock },
+  ];
+
+  const getDurationDisplay = (d: string) => {
+    if (d === "All") return t("all");
+    if (d === "Under 10m") return t("under10m");
+    if (d === "1h+") return t("over1h");
+    return d; // keep others as 10m - 20m
+  };
+
+  const getLangDisplay = (l: string) => {
+    if (l === "All") return t("all");
+    const map: Record<string, string> = {
+      "영어": "english", "프랑스어": "french", "스페인어": "spanish", 
+      "포르투갈어": "portuguese", "한국어": "korean", "일본어": "japanese", 
+      "중국어": "chinese", "힌디어": "hindi", "No Dialogue": "noDialogue"
+    };
+    return map[l] ? t(map[l]) : l;
+  };
 
   const handleSortClick = (sortId: string) => {
     setActiveSort(sortId);
@@ -64,7 +84,7 @@ export function FilterBar({
         <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide snap-x">
           <div className="flex items-center gap-2 text-gray-400 mr-2 flex-shrink-0">
             <Globe className="w-4 h-4" />
-            <span className="text-sm font-medium">Language</span>
+            <span className="text-sm font-medium">{t("language")}</span>
           </div>
           {LANGUAGES.map((lang) => {
             const isActive = activeLanguage === lang;
@@ -83,7 +103,7 @@ export function FilterBar({
                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                   />
                 )}
-                <span className="relative z-10">{lang}</span>
+                <span className="relative z-10">{getLangDisplay(lang)}</span>
               </button>
             );
           })}
@@ -96,7 +116,7 @@ export function FilterBar({
             className="glass px-4 py-2 rounded-lg flex items-center gap-3 text-sm font-medium text-white hover:border-neon-purple/50 transition-colors w-full justify-between"
           >
             <div className="flex flex-col items-start">
-              <span className="text-[10px] text-gray-400 uppercase tracking-wider">Sort by</span>
+              <span className="text-[10px] text-gray-400 uppercase tracking-wider">{t("sortBy")}</span>
               <span>{activeSortLabel}</span>
             </div>
             <ChevronDown className={`w-4 h-4 transition-transform ${isSortOpen ? "rotate-180" : ""}`} />
@@ -133,7 +153,7 @@ export function FilterBar({
       <div className="flex items-center gap-2 overflow-x-auto w-full pb-2 scrollbar-hide snap-x">
         <div className="flex items-center gap-2 text-gray-400 mr-2 flex-shrink-0">
           <Clock className="w-4 h-4" />
-          <span className="text-sm font-medium">Duration</span>
+          <span className="text-sm font-medium">{t("duration")}</span>
         </div>
         {DURATIONS.map((dur) => {
           const isActive = activeDuration === dur;
@@ -152,7 +172,7 @@ export function FilterBar({
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}
-              <span className="relative z-10">{dur}</span>
+              <span className="relative z-10">{getDurationDisplay(dur)}</span>
             </button>
           );
         })}

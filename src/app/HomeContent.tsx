@@ -5,8 +5,10 @@ import { FilterBar } from "@/components/FilterBar";
 import { VideoCard, VideoProps } from "@/components/VideoCard";
 import type { YouTubeVideoInfo } from "@/lib/youtube";
 import { X } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) {
+  const { t } = useLanguage();
   const [activeSort, setActiveSort] = useState("popular");
   const [activeDuration, setActiveDuration] = useState("All");
   const [activeLanguage, setActiveLanguage] = useState("All");
@@ -75,8 +77,8 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {filteredVideos.length === 0 ? (
           <div className="text-center text-gray-400 py-20 bg-white/5 rounded-xl border border-white/10 glass">
-            <p className="text-lg">No content found.</p>
-            <p className="text-sm mt-2">Try selecting a different sort option.</p>
+            <p className="text-lg">{t("noContent")}</p>
+            <p className="text-sm mt-2">{t("tryDifferent")}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

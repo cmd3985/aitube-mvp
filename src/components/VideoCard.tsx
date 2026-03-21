@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Play } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 export interface VideoProps {
   id: string;
@@ -18,6 +19,7 @@ export interface VideoProps {
 }
 
 export function VideoCard({ video, onClick }: { video: VideoProps, onClick?: () => void }) {
+  const { t } = useLanguage();
   return (
     <motion.div
       onClick={onClick}
@@ -53,9 +55,9 @@ export function VideoCard({ video, onClick }: { video: VideoProps, onClick?: () 
         <div className="flex flex-col gap-1 text-xs text-gray-400">
           {video.channelTitle && <span>{video.channelTitle}</span>}
           <div className="flex items-center gap-2">
-            <span>{video.views}</span>
+            <span>{video.views.replace(" views", " " + t("views"))}</span>
             <span className="w-1 h-1 rounded-full bg-gray-600" />
-            <span>{video.uploadedAt}</span>
+            <span>{video.uploadedAt.replace(" months ago", " " + t("monthsAgo")).replace(" days ago", " " + t("daysAgo")).replace(" hours ago", " " + t("hoursAgo")).replace(" a month ago", " 1 " + t("monthsAgo"))}</span>
           </div>
         </div>
       </div>

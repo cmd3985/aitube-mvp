@@ -2,17 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
-import { Film, Clapperboard, Home } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Home, Globe } from "lucide-react";
+import { useState } from "react";
+import { useLanguage } from "@/i18n/LanguageContext";
+import { SupportedLanguage } from "@/i18n/dictionaries";
 
 export function GNB() {
   const pathname = usePathname();
+  const { lang, setLang, t } = useLanguage();
+  const [langOpen, setLangOpen] = useState(false);
 
   const navItems = [
-    { name: "Home", path: "/", icon: Home },
-    { name: "Movies", path: "/movies", icon: Film },
-    { name: "Dramas", path: "/dramas", icon: Clapperboard },
+    { name: t("home"), path: "/", icon: Home },
   ];
+  const languages: SupportedLanguage[] = ["EN", "KO", "JA", "ES", "FR", "PT", "ZH", "HI"];
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass">
@@ -50,6 +54,41 @@ export function GNB() {
                 </Link>
               );
             })}
+
+            {/* Language Switcher */}
+            <div className="relative">
+              <button
+                onClick={() => setLangOpen(!langOpen)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 hover:border-neon-blue/50 hover:bg-white/5 transition-all text-sm font-medium"
+              >
+                <Globe className="w-4 h-4 text-neon-blue" />
+                {lang}
+              </button>
+              
+              <AnimatePresence>
+                {langOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute right-0 mt-2 w-32 py-2 glass rounded-xl border border-white/10 shadow-[0_0_15px_rgba(0,0,0,0.5)] z-50 flex flex-col"
+                  >
+                    {languages.map(l => (
+                      <button
+                        key={l}
+                        onClick={() => {
+                          setLang(l);
+                          setLangOpen(false);
+                        }}
+                        className={`text-left px-4 py-2 text-sm hover:bg-white/10 transition-colors ${lang === l ? "text-neon-blue font-bold" : "text-gray-300"}`}
+                      >
+                        {l}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </nav>
         </div>
       </div>

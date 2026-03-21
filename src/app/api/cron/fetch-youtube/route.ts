@@ -121,25 +121,8 @@ export async function GET(req: Request) {
         }
       }
 
-      // Categories
-      let category = null;
-
-      // Movies criteria: >= 10m OR title/desc has movie keywords
-      const movieKeywords = ["#ai시네마", "full movie", "시네마틱", "short film", "trailer", "concept", "단편"];
-      const isMovieKeyword = movieKeywords.some(kw => fullText.includes(kw));
-      
-      // Dramas criteria: title has drama keywords
-      const dramaKeywords = ["ep.01", "episode", "ep.", "웹드라마", "시리즈", "season", "#ai드라마"];
-      const isDramaKeyword = dramaKeywords.some(kw => titleLower.includes(kw) || fullText.includes(kw));
-
-      if (durationSec >= 600 || isMovieKeyword) {
-        category = "Movie";
-      } else if (durationSec < 600 && isDramaKeyword) {
-        category = "Drama";
-      } else {
-        // Fallback for valid lengths that didn't match keywords (mostly normal movies)
-        category = durationSec >= 180 ? "Movie" : "Drama"; 
-      }
+      // Consolidated Category
+      let category = "Cinema"; // Replaces legacy Movie/Drama distinction
 
       // Language Inference
       const detector = new LanguageDetect();
