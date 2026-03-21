@@ -15,11 +15,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     return NextResponse.json({ error: 'Video not found' }, { status: 404 });
   }
 
-  // 2. Fetch recommended videos (top engagement, exclude current)
+  // 2. Fetch recommended videos (top engagement, same language, exclude current)
+  const videoLang = video.language && video.language !== "Unknown" ? video.language : "영어";
   const { data: recommended } = await supabase
     .from('videos')
     .select('*')
     .neq('youtube_id', id)
+    .eq('language', videoLang)
     .order('engagement_score', { ascending: false })
     .limit(8);
 

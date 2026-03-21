@@ -39,11 +39,13 @@ export default async function WatchPage({ params }: { params: Promise<{ id: stri
     );
   }
 
-  // Fetch recommended
+  // Fetch recommended — same language as current video
+  const videoLang = video.language && video.language !== "Unknown" ? video.language : "영어";
   const { data: recommended } = await supabase
     .from("videos")
     .select("*")
     .neq("youtube_id", id)
+    .eq("language", videoLang)
     .order("engagement_score", { ascending: false })
     .limit(8);
 

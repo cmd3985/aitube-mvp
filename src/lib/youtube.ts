@@ -86,8 +86,9 @@ export async function fetchAIVideos(query: string = "AI short film", maxResults:
     const videoIds = searchData.items.map((item: any) => item.id.videoId).join(",");
     
     // 2. Fetch video details via /videos to get duration, stats, high-res snippet
+    // Include player part to detect vertical (9:16) videos
     const videoRes = await fetch(
-      `${BASE_URL}/videos?part=snippet,contentDetails,statistics&id=${videoIds}&key=${API_KEY}`,
+      `${BASE_URL}/videos?part=snippet,contentDetails,statistics,player&id=${videoIds}&key=${API_KEY}`,
       { next: { revalidate: 3600 } }
     );
     if (!videoRes.ok) throw new Error("Failed to fetch video details");
@@ -104,7 +105,13 @@ export async function fetchAIVideos(query: string = "AI short film", maxResults:
         
         // Quality Control: >= 120 seconds (2 minutes), no #shorts in title/desc
         const isShort = title.includes("#shorts") || desc.includes("#shorts") || durationSec < 120;
-        return !isShort;
+        
+        // Detect vertical (9:16) videos via player embed dimensions
+        const playerWidth = parseInt(item.player?.embedWidth || "1280", 10);
+        const playerHeight = parseInt(item.player?.embedHeight || "720", 10);
+        const isVertical = playerHeight > playerWidth;
+        
+        return !isShort && !isVertical;
       })
       .map((item: any) => ({
         id: item.id,
