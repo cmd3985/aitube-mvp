@@ -39,7 +39,9 @@ export async function POST(request: Request) {
     }
 
     // Fetch YT metadata directly
-    const ytRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=snippet,contentDetails,statistics,status&key=${YOUTUBE_API_KEY}`);
+    const ytRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=snippet,contentDetails,statistics,status&key=${YOUTUBE_API_KEY}`, {
+      headers: { 'Referer': 'https://gencine.org/' }
+    });
     const ytData = await ytRes.json();
     
     if (!ytData.items || ytData.items.length === 0) {

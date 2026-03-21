@@ -72,7 +72,8 @@ export async function fetchAIVideos(query: string = "AI short film", maxResults:
     const searchRes = await fetch(
       `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(
         exactQuery
-      )}&maxResults=${maxResults}&order=${order}&type=video&videoCategoryId=1&relevanceLanguage=${relevanceLanguage}&regionCode=${regionCode}&key=${API_KEY}`
+      )}&maxResults=${maxResults}&order=${order}&type=video&videoCategoryId=1&relevanceLanguage=${relevanceLanguage}&regionCode=${regionCode}&key=${API_KEY}`,
+      { headers: { 'Referer': 'https://gencine.org/' } }
     );
 
     if (!searchRes.ok) {
@@ -90,7 +91,7 @@ export async function fetchAIVideos(query: string = "AI short film", maxResults:
     // Include player part to detect vertical (9:16) videos
     const detailsRes = await fetch(
       `${BASE_URL}/videos?part=snippet,contentDetails,statistics,player,status&id=${videoIds}&key=${API_KEY}`,
-      { next: { revalidate: 3600 } }
+      { next: { revalidate: 3600 }, headers: { 'Referer': 'https://gencine.org/' } }
     );
     if (!detailsRes.ok) throw new Error("Failed to fetch video details");
     const videoData = await detailsRes.json();

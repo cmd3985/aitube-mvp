@@ -39,7 +39,7 @@ export async function GET(request: Request) {
     for (const chunk of chunks) {
       const idsParam = chunk.join(',');
       const url = `https://www.googleapis.com/youtube/v3/videos?part=status&id=${idsParam}&key=${YOUTUBE_API_KEY}`;
-      const res = await fetch(url);
+      const res = await fetch(url, { headers: { 'Referer': 'https://gencine.org/' } });
       const data = await res.json();
 
       if (data.error) {
