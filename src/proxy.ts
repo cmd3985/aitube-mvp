@@ -31,6 +31,7 @@ export async function proxy(request: NextRequest) {
   if (
     pathname.startsWith('/_next') ||
     pathname.includes('/api/') ||
+    pathname.startsWith('/auth/') ||
     pathname.match(/\.(.*)$/)
   ) {
     // We still need to run updateSession for API routes and everything except static assets
