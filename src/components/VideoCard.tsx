@@ -176,6 +176,15 @@ export function VideoCard({ video, onClick }: { video: VideoProps, onClick?: () 
           )}
 
           {/* Heart Bookmark Button */}
+          <button
+            onClick={toggleBookmark}
+            className={`absolute top-2 right-2 z-20 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+              isBookmarked 
+                ? "bg-neon-purple/90 border-neon-purple shadow-[0_0_10px_rgba(139,92,246,0.8)] opacity-100 translate-y-0" 
+                : "bg-black/40 backdrop-blur-md border border-white/20 hover:bg-white/20 opacity-0 -translate-y-2 group-hover:opacity-100 group-hover:translate-y-0"
+            }`}
+          >
+            <Heart 
               className={`w-4 h-4 transition-transform duration-300 ${
                 isBookmarked ? "text-white fill-white scale-110" : "text-white fill-transparent"
               }`} 
