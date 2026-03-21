@@ -14,11 +14,11 @@ export async function GET(req: Request) {
     const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || "";
     if (!YOUTUBE_API_KEY) throw new Error("Missing YouTube API Key");
 
-    // Get all videos that don't have an ISO string (ISO strings always contain 'T')
+    // Get all videos that don't end in Z (meaning they are legacy strings like "6 months ago")
     const { data: videos, error } = await adminClient
       .from('videos')
       .select('youtube_id')
-      .not('published_at', 'ilike', '%T%');
+      .not('published_at', 'like', '%Z');
 
     if (error || !videos) return NextResponse.json({ error: 'Failed to fetch videos' });
 
