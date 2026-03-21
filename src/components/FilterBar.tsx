@@ -22,6 +22,10 @@ export const LANGUAGES = [
   "일본어",
   "중국어",
   "힌디어",
+  "아랍어",
+  "인도네시아어",
+  "러시아어",
+  "독일어",
   "No Dialogue"
 ];
 
@@ -63,7 +67,9 @@ export function FilterBar({
     const map: Record<string, string> = {
       "영어": "english", "프랑스어": "french", "스페인어": "spanish", 
       "포르투갈어": "portuguese", "한국어": "korean", "일본어": "japanese", 
-      "중국어": "chinese", "힌디어": "hindi", "No Dialogue": "noDialogue"
+      "중국어": "chinese", "힌디어": "hindi",
+      "아랍어": "arabic", "인도네시아어": "indonesian", "러시아어": "russian", "독일어": "german",
+      "No Dialogue": "noDialogue"
     };
     return map[l] ? t(map[l]) : l;
   };
