@@ -167,13 +167,11 @@ export async function GET(req: Request) {
       // Consolidated Category
       let category = "Cinema"; // Replaces legacy Movie/Drama distinction
 
-      // Language Inference
+      // Language Inference (No Dialogue videos now fall through to normal detection)
       const detector = new LanguageDetect();
       let language = "영어"; // default
       
-      if (fullText.includes("no dialogue") || fullText.includes("silent") || fullText.includes("bgm") || fullText.includes("music only")) {
-        language = "No Dialogue";
-      } else {
+      {
         // CJK Regex Fast-Path (LanguageDetect struggles with CJK)
         if (/[가-힣]/.test(fullText)) {
           language = "한국어";
