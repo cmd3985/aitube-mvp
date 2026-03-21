@@ -29,13 +29,45 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
 
   const defaultLangFilter = getDefaultLanguageFilter(lang);
 
-  const [activeSort, setActiveSort] = useState("popular");
-  const [activeDuration, setActiveDuration] = useState("All");
-  const [activeLanguage, setActiveLanguage] = useState(defaultLangFilter);
+  const [activeSort, setActiveSortState] = useState("popular");
+  const [activeDuration, setActiveDurationState] = useState("All");
+  const [activeLanguage, setActiveLanguageState] = useState(defaultLangFilter);
 
+  // Load saved state (Client-side only) to prevent SSR hydration errors
+  useEffect(() => {
+    const savedSort = sessionStorage.getItem('gencine_sort');
+    const savedDur = sessionStorage.getItem('gencine_duration');
+    const savedLang = sessionStorage.getItem('gencine_lang');
+    
+    if (savedSort) setActiveSortState(savedSort);
+    if (savedDur) setActiveDurationState(savedDur);
+    if (savedLang) setActiveLanguageState(savedLang);
+  }, []);
+
+  const setActiveSort = (val: string) => {
+    setActiveSortState(val);
+    if (typeof window !== 'undefined') sessionStorage.setItem('gencine_sort', val);
+  };
+  
+  const setActiveDuration = (val: string) => {
+    setActiveDurationState(val);
+    if (typeof window !== 'undefined') sessionStorage.setItem('gencine_duration', val);
+  };
+  
+  const setActiveLanguage = (val: string) => {
+    setActiveLanguageState(val);
+    if (typeof window !== 'undefined') sessionStorage.setItem('gencine_lang', val);
+  };
+
+  const initialLang = useRef(lang);
   // Sync filter when UI language changes
   useEffect(() => {
-    setActiveLanguage(getDefaultLanguageFilter(lang));
+    if (initialLang.current !== lang) {
+      initialLang.current = lang;
+      // When global site language changes, overwrite session state and reset to default
+      const newDefault = getDefaultLanguageFilter(lang);
+      setActiveLanguage(newDefault);
+    }
   }, [lang]);
 
   const observerTarget = useRef<HTMLDivElement>(null);
