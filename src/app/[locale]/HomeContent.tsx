@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import useSWRInfinite from 'swr/infinite';
 import { FilterBar } from "@/components/FilterBar";
 import { VideoCard, VideoProps } from "@/components/VideoCard";
-import type { YouTubeVideoInfo } from "@/lib/youtube";
-import { X } from "lucide-react";
+import { X, Loader } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
+
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) {
   const { t } = useLanguage();
@@ -13,22 +15,32 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
   const [activeDuration, setActiveDuration] = useState("All");
   const [activeLanguage, setActiveLanguage] = useState("All");
   const [selectedVideo, setSelectedVideo] = useState<VideoProps | null>(null);
-  
-  // Infinite Scroll State
-  const [visibleCount, setVisibleCount] = useState(24);
+
   const observerTarget = useRef<HTMLDivElement>(null);
 
-  // Reset pagination when filters change
-  useEffect(() => {
-    setVisibleCount(24);
-  }, [activeSort, activeDuration, activeLanguage]);
+  // SWR Infinite Pagination
+  const getKey = (pageIndex: number, previousPageData: any) => {
+    if (previousPageData && !previousPageData.nextPage) return null; // Reached end
+    return `/api/videos?page=${pageIndex + 1}&sort=${activeSort}&duration=${activeDuration}&language=${activeLanguage}`;
+  };
+
+  const { data, size, setSize, isValidating } = useSWRInfinite(getKey, fetcher, {
+    fallbackData: activeSort === "popular" && activeDuration === "All" && activeLanguage === "All" 
+      ? [{ videos: initialVideos, nextPage: initialVideos.length === 24 ? 2 : null }] 
+      : undefined,
+    revalidateFirstPage: false,
+    revalidateAll: false,
+  });
+
+  const displayedVideos: VideoProps[] = data ? data.flatMap(page => page.videos) : [];
+  const isReachingEnd = data && data[data.length - 1]?.nextPage === null;
 
   // Observer Logic
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
-          setVisibleCount((prev) => prev + 12);
+        if (entries[0].isIntersecting && !isValidating && !isReachingEnd) {
+          setSize((prev) => prev + 1);
         }
       },
       { threshold: 0.1 }
@@ -38,59 +50,7 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
       observer.observe(observerTarget.current);
     }
     return () => observer.disconnect();
-  }, []);
-
-  const getSecs = (duration: string) => {
-    const parts = duration.split(":").map(Number);
-    if (parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
-    return parts[0]*60 + parts[1];
-  };
-
-  // Filtering and sorting
-  const filteredVideos = initialVideos.filter(v => {
-    // 1. Language Filter
-    if (activeLanguage !== "All") {
-      // If language is somehow undefined or missing on old records, fallback check or just hide
-      const vLang = v.language || "Unknown";
-      if (vLang !== activeLanguage) return false;
-    }
-
-    // 2. Duration Filter
-    if (activeDuration === "All") return true;
-    const m = getSecs(v.duration) / 60;
-    if (activeDuration === "Under 10m") return m < 10;
-    if (activeDuration === "10m - 20m") return m >= 10 && m < 20;
-    if (activeDuration === "20m - 30m") return m >= 20 && m < 30;
-    if (activeDuration === "30m - 40m") return m >= 30 && m < 40;
-    if (activeDuration === "40m - 50m") return m >= 40 && m < 50;
-    if (activeDuration === "1h+") return m >= 60;
-    return true;
-  }).sort((a, b) => {
-    if (activeSort === "popular") {
-      const aViews = parseInt(a.views.replace(/\D/g, "")) || 0;
-      const bViews = parseInt(b.views.replace(/\D/g, "")) || 0;
-      return bViews - aViews;
-    }
-    if (activeSort === "latest") {
-      const dateA = a.rawDate ? new Date(a.rawDate).getTime() : 0;
-      const dateB = b.rawDate ? new Date(b.rawDate).getTime() : 0;
-      return dateB - dateA;
-    }
-    if (activeSort === "trending") {
-      const getTrendingScore = (v: VideoProps) => {
-        const views = parseInt(v.views.replace(/\D/g, "")) || 0;
-        const hours = (Date.now() - (v.rawDate ? new Date(v.rawDate).getTime() : Date.now())) / (1000 * 60 * 60);
-        return views / Math.pow(Math.max(hours, 2), 1.5); // HackerNews gravity algorithm
-      };
-      return getTrendingScore(b) - getTrendingScore(a);
-    }
-    if (activeSort === "runtime") {
-      return getSecs(b.duration) - getSecs(a.duration);
-    }
-    return 0;
-  });
-
-  const displayedVideos = filteredVideos.slice(0, visibleCount);
+  }, [isValidating, isReachingEnd, setSize]);
 
   return (
     <main className="w-full">
@@ -103,7 +63,7 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
       />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {filteredVideos.length === 0 ? (
+        {data && displayedVideos.length === 0 ? (
           <div className="text-center text-gray-400 py-20 bg-white/5 rounded-xl border border-white/10 glass">
             <p className="text-lg">{t("noContent")}</p>
             <p className="text-sm mt-2">{t("tryDifferent")}</p>
@@ -123,10 +83,13 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
                 />
               ))}
             </div>
+            
             {/* Infinite Scroll Loader Trigger */}
-            {visibleCount < filteredVideos.length && (
+            {!isReachingEnd && (
               <div ref={observerTarget} className="h-20 flex items-center justify-center mt-8">
-                <div className="w-8 h-8 border-4 border-neon-purple/30 border-t-neon-blue rounded-full animate-spin shadow-[0_0_15px_rgba(0,242,254,0.5)]"></div>
+                {isValidating && (
+                  <div className="w-8 h-8 border-4 border-neon-purple/30 border-t-neon-blue rounded-full animate-spin shadow-[0_0_15px_rgba(0,242,254,0.5)]"></div>
+                )}
               </div>
             )}
           </>
