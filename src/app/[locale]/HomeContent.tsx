@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FilterBar } from "@/components/FilterBar";
 import { VideoCard, VideoProps } from "@/components/VideoCard";
 import type { YouTubeVideoInfo } from "@/lib/youtube";
@@ -13,6 +13,32 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
   const [activeDuration, setActiveDuration] = useState("All");
   const [activeLanguage, setActiveLanguage] = useState("All");
   const [selectedVideo, setSelectedVideo] = useState<VideoProps | null>(null);
+  
+  // Infinite Scroll State
+  const [visibleCount, setVisibleCount] = useState(24);
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setVisibleCount(24);
+  }, [activeSort, activeDuration, activeLanguage]);
+
+  // Observer Logic
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((prev) => prev + 12);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+    return () => observer.disconnect();
+  }, []);
 
   const getSecs = (duration: string) => {
     const parts = duration.split(":").map(Number);
@@ -64,6 +90,8 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
     return 0;
   });
 
+  const displayedVideos = filteredVideos.slice(0, visibleCount);
+
   return (
     <main className="w-full">
       <FilterBar 
@@ -81,19 +109,27 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
             <p className="text-sm mt-2">{t("tryDifferent")}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredVideos.map((video) => (
-              <VideoCard 
-                key={video.id} 
-                video={{
-                  ...video,
-                  isDrama: video.title.toLowerCase().includes("episode") || video.title.toLowerCase().includes("ep."),
-                  episode: video.title.toLowerCase().includes("ep.") ? 1 : undefined
-                }} 
-                onClick={() => setSelectedVideo(video)}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {displayedVideos.map((video) => (
+                <VideoCard 
+                  key={video.id} 
+                  video={{
+                    ...video,
+                    isDrama: video.title.toLowerCase().includes("episode") || video.title.toLowerCase().includes("ep."),
+                    episode: video.title.toLowerCase().includes("ep.") ? 1 : undefined
+                  }} 
+                  onClick={() => setSelectedVideo(video)}
+                />
+              ))}
+            </div>
+            {/* Infinite Scroll Loader Trigger */}
+            {visibleCount < filteredVideos.length && (
+              <div ref={observerTarget} className="h-20 flex items-center justify-center mt-8">
+                <div className="w-8 h-8 border-4 border-neon-purple/30 border-t-neon-blue rounded-full animate-spin shadow-[0_0_15px_rgba(0,242,254,0.5)]"></div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
