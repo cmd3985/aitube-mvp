@@ -36,13 +36,29 @@ export async function GET(req: Request) {
       { q: "AI 短片", lang: "zh" },
       { q: "AI लघु फिल्म", lang: "hi" },
     ];
-    // pick one randomly
-    const pick = QUERIES[Math.floor(Math.random() * QUERIES.length)];
-    const rawVideos = await fetchAIVideos(pick.q, 50, pick.lang);
+    // Shuffle queries and pick 5 to execute concurrently
+    const shuffled = QUERIES.sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, 5);
+    
+    // Maintain a healthy mix of top relevancy and brand new sorting
+    const orders: ("relevance" | "date" | "viewCount")[] = ["relevance", "relevance", "viewCount", "date", "date"];
+    
+    const results = await Promise.all(
+      selected.map((pick, i) => fetchAIVideos(pick.q, 50, pick.lang, orders[i]))
+    );
+    
+    const rawVideos = results.flat();
+
+    // Deduplicate fetched videos by YouTube ID
+    const uniqueMap = new Map();
+    for (const v of rawVideos) {
+      if (!uniqueMap.has(v.id)) uniqueMap.set(v.id, v);
+    }
+    const uniqueRawVideos = Array.from(uniqueMap.values());
     
     // Categorize
     const allVideos = [];
-    for (const v of rawVideos) {
+    for (const v of uniqueRawVideos) {
       const getDurationSecs = (durStr: string) => {
         const parts = durStr.split(":").map(Number);
         if (parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
@@ -213,7 +229,8 @@ export async function GET(req: Request) {
       message: `Synced ${upsertedCount} videos.`,
       debug: {
         cinemaFound,
-        totalAttempted: allVideos.length,
+        rawFetched: uniqueRawVideos.length,
+        qcPassed: allVideos.length,
         supabaseError: firstError
       }
     });
