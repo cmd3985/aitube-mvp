@@ -6,14 +6,14 @@ import { useLanguage } from "@/i18n/LanguageContext";
 export function Hero() {
   const { t } = useLanguage();
   return (
-    <div className="relative w-full h-[50vh] min-h-[400px] flex items-center justify-center overflow-hidden">
+    <div className="relative w-full pt-24 pb-12 flex items-center justify-center overflow-hidden">
       {/* Dynamic Background */}
       <div className="absolute inset-0 bg-black">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,242,254,0.15),transparent_50%)]" />
         <div className="absolute top-0 right-0 w-1/2 h-full bg-[radial-gradient(ellipse_at_center,rgba(139,92,246,0.1),transparent_50%)]" />
       </div>
 
-      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto flex flex-col items-center mt-12">
+      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto flex flex-col items-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -43,7 +43,7 @@ export function Hero() {
       </div>
 
       {/* Fade out to content */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none bg-gradient-to-t from-black to-transparent" />
     </div>
   );
 }
