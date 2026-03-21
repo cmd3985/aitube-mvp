@@ -127,7 +127,10 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
             className="absolute inset-0 cursor-pointer" 
             onClick={() => setSelectedVideo(null)}
           />
-          <div className="relative w-full max-w-6xl aspect-video rounded-2xl overflow-hidden glass border-neon-blue/50 shadow-[0_0_50px_rgba(0,242,254,0.15)] animate-in fade-in zoom-in duration-300">
+          <div 
+            className="relative w-full aspect-video rounded-2xl overflow-hidden glass border-neon-blue/50 shadow-[0_0_50px_rgba(0,242,254,0.15)] animate-in fade-in zoom-in duration-300"
+            style={{ maxWidth: "min(72rem, calc((100vh - 40px) * 16 / 9))" }}
+          >
             <button
               onClick={() => setSelectedVideo(null)}
               className="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 hover:bg-neon-purple/80 text-white transition-colors border border-white/10"
@@ -138,7 +141,7 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
               src={`https://www.youtube.com/embed/${selectedVideo.id}?autoplay=1&rel=0`}
               title={selectedVideo.title}
               className="w-full h-full border-0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
               allowFullScreen
             />
           </div>
