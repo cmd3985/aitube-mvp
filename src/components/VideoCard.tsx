@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Heart, X, LogIn, Bookmark } from "lucide-react";
+import { Play, Heart, X, LogIn, Bookmark, Trash2 } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
@@ -24,6 +24,7 @@ export interface VideoProps {
 export function VideoCard({ video, onClick }: { video: VideoProps, onClick?: () => void }) {
   const { t } = useLanguage();
   const [user, setUser] = useState<User | null>(null);
+  const [isDeleted, setIsDeleted] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [showNudge, setShowNudge] = useState(false);
@@ -106,6 +107,30 @@ export function VideoCard({ video, onClick }: { video: VideoProps, onClick?: () 
     });
   };
 
+  const isAdmin = user?.email === "jumpingkor@gmail.com" || user?.email === "mnibsi@gmail.com";
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isAdmin) return;
+
+    if (!confirm("정말 이 영상을 데이터베이스에서 완전히 삭제하시겠습니까?")) return;
+
+    try {
+      const res = await fetch(`/api/admin/videos/${video.id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setIsDeleted(true);
+      } else {
+        const errorData = await res.json();
+        alert("삭제 실패: " + errorData.error);
+      }
+    } catch (e: any) {
+      alert("에러 발생: " + e.message);
+    }
+  };
+
+  if (isDeleted) return null;
+
   return (
     <>
       <motion.div
@@ -137,16 +162,20 @@ export function VideoCard({ video, onClick }: { video: VideoProps, onClick?: () 
             </div>
           )}
 
+          {/* Admin Delete Button */}
+          {isAdmin && (
+            <div className="absolute top-3 left-3 z-20">
+              <button
+                onClick={handleDelete}
+                className="p-2.5 rounded-full bg-red-500/80 hover:bg-red-600 transition-colors shadow-lg backdrop-blur-md"
+                title="Delete Video (Admin Only)"
+              >
+                <Trash2 className="w-5 h-5 text-white" />
+              </button>
+            </div>
+          )}
+
           {/* Heart Bookmark Button */}
-          <button
-            onClick={toggleBookmark}
-            className={`absolute top-2 right-2 z-20 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
-              isBookmarked 
-                ? "bg-neon-purple/90 border-neon-purple shadow-[0_0_10px_rgba(139,92,246,0.8)] opacity-100 translate-y-0" 
-                : "bg-black/40 backdrop-blur-md border border-white/20 hover:bg-white/20 opacity-0 -translate-y-2 group-hover:opacity-100 group-hover:translate-y-0"
-            }`}
-          >
-            <Heart 
               className={`w-4 h-4 transition-transform duration-300 ${
                 isBookmarked ? "text-white fill-white scale-110" : "text-white fill-transparent"
               }`} 
