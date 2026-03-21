@@ -5,8 +5,8 @@ export async function updateSession(request: NextRequest, response: NextResponse
   let supabaseResponse = response
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder',
     {
       cookies: {
         getAll() {
