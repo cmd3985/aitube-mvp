@@ -76,14 +76,24 @@ export function VideoCard({ video, onClick }: { video: VideoProps, onClick?: () 
     setIsBookmarked(newStatus);
 
     if (newStatus) {
-      await supabase.from("bookmarks").insert({
+      const { error } = await supabase.from("bookmarks").insert({
         user_id: user.id,
         video_id: video.id
       });
+      if (error) {
+        console.error("Bookmark Error:", error);
+        alert("Failed to save bookmark. " + (error.message || ""));
+        setIsBookmarked(false); // Rollback
+      }
     } else {
-      await supabase.from("bookmarks").delete()
+      const { error } = await supabase.from("bookmarks").delete()
         .eq("user_id", user.id)
         .eq("video_id", video.id);
+      if (error) {
+        console.error("Bookmark Error:", error);
+        alert("Failed to remove bookmark. " + (error.message || ""));
+        setIsBookmarked(true); // Rollback
+      }
     }
   };
 

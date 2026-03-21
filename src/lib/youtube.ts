@@ -139,12 +139,46 @@ export async function fetchAIVideos(query: string = "AI short film", maxResults:
                 totalEdgePixels++;
               }
             }
-            const darkRatio = darkPixels / totalEdgePixels;
-            if (darkRatio > 0.80) {
-              console.log(`[Pillarbox] Rejected vertical content: "${snippet.title}" (darkRatio=${darkRatio.toFixed(2)})`);
-              return null;
+            if (darkPixels / totalEdgePixels > 0.8) {
+              console.log(`[Pillarbox] Rejected vertical content: "${snippet.title}" (darkRatio=${(darkPixels / totalEdgePixels).toFixed(2)})`);
+              return null; // Reject 9:16 videos padded with black bars
+            }
+            
+            // AI Vision Check: Detect blurred sidebars padding 
+            if (process.env.OPENAI_API_KEY) {
+              const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                  "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  model: "gpt-4o-mini",
+                  messages: [
+                    {
+                      role: "user",
+                      content: [
+                        { type: "text", text: "Is this image a vertical video (9:16 or portrait) that has been padded with blurred or duplicate sidebars to fit a horizontal (16:9) frame? This is common for YouTube Shorts uploaded as regular videos. Reply exactly with only 'true' or 'false'." },
+                        { type: "image_url", image_url: { url: thumbUrl } }
+                      ]
+                    }
+                  ],
+                  max_tokens: 10
+                })
+              });
+              if (aiRes.ok) {
+                const aiData = await aiRes.json();
+                const answer = aiData.choices?.[0]?.message?.content?.trim()?.toLowerCase() || "false";
+                if (answer.includes("true")) {
+                  console.log(`[AI Vision] Rejected blurred pillarbox content: "${snippet.title}"`);
+                  return null; // Reject blurred pillarbox
+                }
+              } else {
+                console.error("OpenAI API call failed:", aiRes.status, await aiRes.text());
+              }
             }
           } catch (e) {
+            console.error("Thumbnail analysis error:", e);
             // If thumbnail analysis fails, allow the video through
           }
         }
