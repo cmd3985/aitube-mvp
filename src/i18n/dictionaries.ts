@@ -53,6 +53,7 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     myListTitle: "My AI Cinema Lounge 🎬",
     myListSubtitle: "Scrap and seamlessly watch inspiration from around the world",
     emptyMyList: "Your list is empty. Find your first masterpiece!",
+    privacyPolicy: "Privacy Policy",
   },
   KO: {
     home: "홈",
@@ -106,6 +107,7 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     myListTitle: "나만의 AI 시네마 라운지 🎬",
     myListSubtitle: "전 세계의 영감을 스크랩하고 이어보세요",
     emptyMyList: "아직 보관함이 비어있습니다. 첫 번째 명작을 찾아보세요!",
+    privacyPolicy: "개인정보 처리방침",
   },
   JA: {
     home: "ホーム",
@@ -159,6 +161,7 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     myListTitle: "マイAIシネマラウンジ 🎬",
     myListSubtitle: "世界中のインスピレーションをスクラップして楽しもう",
     emptyMyList: "リストはまだ空です。最初の名作を見つけましょう！",
+    privacyPolicy: "プライバシーポリシー",
   },
   ES: {
     home: "Inicio",
@@ -212,6 +215,7 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     myListTitle: "Mi Salón de Cine AI 🎬",
     myListSubtitle: "Guarda y disfruta de inspiración de todo el mundo",
     emptyMyList: "Tu lista está vacía. ¡Encuentra tu primera obra maestra!",
+    privacyPolicy: "Política de Privacidad",
   },
   FR: {
     home: "Accueil",
@@ -265,6 +269,7 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     myListTitle: "Mon Salon Cinéma IA 🎬",
     myListSubtitle: "Sauvegardez et regardez l'inspiration du monde entier",
     emptyMyList: "Votre liste est vide. Trouvez votre premier chef-d'œuvre !",
+    privacyPolicy: "Politique de confidentialité",
   },
   PT: {
     home: "Início",
@@ -318,6 +323,7 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     myListTitle: "Meu Lounge de Cinema IA 🎬",
     myListSubtitle: "Salve e assista a inspirações de todo o mundo",
     emptyMyList: "Sua lista está vazia. Encontre sua primeira obra-prima!",
+    privacyPolicy: "Política de Privacidade",
   },
   ZH: {
     home: "首页",
@@ -371,6 +377,7 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     myListTitle: "我的AI影院酒廊 🎬",
     myListSubtitle: "收藏并观看来自世界各地的灵感",
     emptyMyList: "您的列表为空。快去发现您的第一部杰作吧！",
+    privacyPolicy: "隐私政策",
   },
   HI: {
     home: "मुख्य पृष्ठ",
@@ -424,6 +431,7 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     myListTitle: "मेरा AI सिनेमा लाउंज 🎬",
     myListSubtitle: "दुनिया भर से प्रेरणाओं को सहेजें और देखें",
     emptyMyList: "आपकी सूची खाली है। अपनी पहली उत्कृष्ट कृति खोजें!",
+    privacyPolicy: "गोपनीयता नीति",
   },
   AR: {
     home: "الرئيسية",
@@ -477,6 +485,7 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     myListTitle: "صالة سينما الذكاء الاصطناعي الخاصة بي 🎬",
     myListSubtitle: "احفظ وشاهد الإلهام من جميع أنحاء العالم",
     emptyMyList: "قائمتك فارغة. ابحث عن تحفتك الأولى!",
+    privacyPolicy: "سياسة الخصوصية",
   },
   ID: {
     home: "Beranda",
@@ -530,6 +539,7 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     myListTitle: "Lounge Bioskop AI Saya 🎬",
     myListSubtitle: "Simpan dan tonton inspirasi dari seluruh dunia",
     emptyMyList: "Daftar Anda kosong. Temukan mahakarya pertama Anda!",
+    privacyPolicy: "Kebijakan Privasi",
   },
   RU: {
     home: "Главная",
@@ -583,6 +593,7 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     myListTitle: "Мой ИИ Кинозал 🎬",
     myListSubtitle: "Сохраняйте и смотрите вдохновляющие видео со всего мира",
     emptyMyList: "Ваш список пуст. Найдите свой первый шедевр!",
+    privacyPolicy: "Политика конфиденциальности",
   },
   DE: {
     home: "Startseite",
@@ -636,5 +647,6 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     myListTitle: "Meine KI-Kino-Lounge 🎬",
     myListSubtitle: "Speichern und ansehen von Inspirationen aus der ganzen Welt",
     emptyMyList: "Ihre Liste ist leer. Finden Sie Ihr erstes Meisterwerk!",
+    privacyPolicy: "Datenschutzrichtlinie",
   }
 };

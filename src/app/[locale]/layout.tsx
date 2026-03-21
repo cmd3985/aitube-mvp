@@ -30,6 +30,8 @@ export const metadata: Metadata = {
 };
 import { GNB } from "@/components/GNB";
 import { LanguageProvider } from "@/i18n/LanguageContext";
+import { dictionaries, SupportedLanguage } from "@/i18n/dictionaries";
+import Link from "next/link";
 
 export default async function RootLayout({
   children,
@@ -39,7 +41,9 @@ export default async function RootLayout({
   params: Promise<{ locale: string }> | { locale: string };
 }) {
   const resolvedParams = await Promise.resolve(params);
-  const locale = resolvedParams.locale;
+  const locale = resolvedParams.locale.toUpperCase() as SupportedLanguage;
+  const t = dictionaries[locale] || dictionaries.EN;
+  
   return (
     <html
       lang={locale}
@@ -51,8 +55,11 @@ export default async function RootLayout({
           <main className="flex-grow pt-16">
             {children}
           </main>
-          <footer className="border-t border-white/5 py-6 text-center text-xs text-gray-500">
-            © 2026 GenCine. All rights reserved.
+          <footer className="border-t border-white/5 py-6 flex flex-col items-center gap-2 text-xs text-gray-500">
+            <div>© 2026 GenCine. All rights reserved.</div>
+            <Link href={`/${locale.toLowerCase()}/privacy`} className="hover:text-white transition-colors underline underline-offset-2">
+              {t.privacyPolicy}
+            </Link>
           </footer>
         </LanguageProvider>
       </body>
