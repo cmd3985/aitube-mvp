@@ -172,7 +172,7 @@ export async function GET(req: Request) {
       let language = "영어"; // default
       
       {
-        // CJK Regex Fast-Path (LanguageDetect struggles with CJK)
+        // Alphabet Regex Fast-Paths (LanguageDetect struggles with non-Latin scripts)
         if (/[가-힣]/.test(fullText)) {
           language = "한국어";
         } else if (/[ぁ-んァ-ン]/.test(fullText)) {
@@ -181,6 +181,10 @@ export async function GET(req: Request) {
           language = "중국어";
         } else if (/[\u0900-\u097F]/.test(fullText)) {
           language = "힌디어";
+        } else if (/[\u0600-\u06FF]/.test(fullText)) {
+          language = "아랍어";
+        } else if (/[а-яА-ЯёЁ]/.test(fullText)) {
+          language = "러시아어";
         } else {
           // Use LanguageDetect for Latin-based languages
           const detected = detector.detect(fullText, 3); // top 3
@@ -189,6 +193,8 @@ export async function GET(req: Request) {
             if (topLang === 'french') language = "프랑스어";
             else if (topLang === 'spanish') language = "스페인어";
             else if (topLang === 'portuguese') language = "포르투갈어";
+            else if (topLang === 'german') language = "독일어";
+            else if (topLang === 'indonesian' || topLang === 'malay') language = "인도네시아어";
             else language = "영어"; 
           }
         }
