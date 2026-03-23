@@ -93,15 +93,15 @@ export async function GET(req: Request) {
 
       // --- STEP 1: Multi-lingual Blacklist (Drop, Cost 0) ---
       const blacklist = [
-        "결말포함", "영화리뷰", "명작", "요약", "몰아보기", "스포", "평론", // KO
-        "ending explained", "recap", "movie review", "explained", "summary", "reaction", "how to", "tutorial", // EN
-        "ネタバレ", "レビュー", "結末", "解説", "要約", "反応", // JA
-        "resumen", "reseña", "final explicado", "crítica", "résumé", "fin expliquée", "resumo", // ES/FR/PT
-        "解说", "影评", "结局", "剧透", "解說", "影評", "스포일러", "समीक्षा", "स्पष्टीकरण", // ZH/HI/KO
+        "결말포함", "영화리뷰", "명작", "요약", "몰아보기", "스포", "평론", "후기", "리뷰", "수상 소감", "메이킹", "비하인드", "튜토리얼", "강의", "만드는 법", "만드는법", // KO
+        "ending explained", "recap", "movie review", "explained", "summary", "reaction", "how to", "tutorial", "vlog", "behind the scenes", "making of", "review", // EN
+        "ネタバレ", "レビュー", "結末", "解説", "要約", "反応", "作り方", "メイキング", // JA
+        "resumen", "reseña", "final explicado", "crítica", "résumé", "fin expliquée", "resumo", "tutorial", "cómo hacer", // ES/FR/PT
+        "解说", "影评", "结局", "剧透", "解說", "影評", "스포일러", "समीक्षा", "स्पष्टीकरण", "教程", "幕后", // ZH/HI/KO
         "مراجعة فيلم", "نهاية مشروحة", "الجزء", "ملخص", "شرح", // AR
-        "ulasan film", "penjelasan akhir", "alur cerita", "review", // ID
-        "обзор фильма", "концовка объяснение", "краткий пересказ", "объяснение", // RU
-        "filmkritik", "ende erklärt", "zusammenfassung", "erklärung" // DE
+        "ulasan film", "penjelasan akhir", "alur cerita", "tutorial", // ID
+        "обзор фильма", "концовка объяснение", "краткий пересказ", "объяснение", "туториал", // RU
+        "filmkritik", "ende erklärt", "zusammenfassung", "erklärung", "tutorial" // DE
       ];
       
       const isBlacklisted = blacklist.some(p => fullText.includes(p));
