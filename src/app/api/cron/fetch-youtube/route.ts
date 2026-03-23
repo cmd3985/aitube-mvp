@@ -95,13 +95,13 @@ export async function GET(req: Request) {
       const blacklist = [
         "결말포함", "영화리뷰", "명작", "요약", "몰아보기", "스포", "평론", "후기", "리뷰", "수상 소감", "메이킹", "비하인드", "튜토리얼", "강의", "만드는 법", "만드는법", "제작기", "제작 과정", "제작과정", "노하우", "꿀팁", "팁", "강좌", "가이드", "수익창출", "돈 버는", "돈버는", "부업", "클래스", // KO
         "ending explained", "recap", "movie review", "explained", "summary", "reaction", "how to", "tutorial", "vlog", "behind the scenes", "making of", "review", "tips", "guide", "course", "workflow", "how i made", "how i make", "process", "make money", "passive income", "bts", // EN
-        "ネタバレ", "レビュー", "結末", "解説", "要約", "反応", "作り方", "メイキング", // JA
-        "resumen", "reseña", "final explicado", "crítica", "résumé", "fin expliquée", "resumo", "tutorial", "cómo hacer", // ES/FR/PT
-        "解说", "影评", "结局", "剧透", "解說", "影評", "스포일러", "समीक्षा", "स्पष्टीकरण", "教程", "幕后", // ZH/HI/KO
-        "مراجعة فيلم", "نهاية مشروحة", "الجزء", "ملخص", "شرح", // AR
-        "ulasan film", "penjelasan akhir", "alur cerita", "tutorial", // ID
-        "обзор фильма", "концовка объяснение", "краткий пересказ", "объяснение", "туториал", // RU
-        "filmkritik", "ende erklärt", "zusammenfassung", "erklärung", "tutorial" // DE
+        "ネタバレ", "レビュー", "結末", "解説", "要約", "反応", "作り方", "メイキング", "ヒント", "裏側", "稼ぎ方", "講座", // JA
+        "resumen", "reseña", "final explicado", "crítica", "résumé", "fin expliquée", "resumo", "tutorial", "cómo hacer", "consejos", "trucos", "detrás de cámaras", "tutoriel", "tuto", "coulisses", "astuces", "dicas", "como fazer", // ES/FR/PT
+        "解说", "影评", "结局", "剧透", "解說", "影評", "스포일러", "समीक्षा", "स्पष्टीकरण", "教程", "幕后", "技巧", "赚钱", "怎么做", "ट्यूटोरियल", "सुझाव", // ZH/HI
+        "مراجعة فيلم", "نهاية مشروحة", "الجزء", "ملخص", "شرح", "كيف تصنع", "نصائح", "دورة", // AR
+        "ulasan film", "penjelasan akhir", "alur cerita", "tutorial", "cara membuat", "tips", // ID
+        "обзор фильма", "концовка объяснение", "краткий пересказ", "объяснение", "туториал", "как сделать", "советы", // RU
+        "filmkritik", "ende erklärt", "zusammenfassung", "erklärung", "tutorial", "tipps", "wie man", "hinter den kulissen" // DE
       ];
       
       const isBlacklisted = blacklist.some(p => fullText.includes(p));
