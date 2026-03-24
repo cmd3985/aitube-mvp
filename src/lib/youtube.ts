@@ -74,7 +74,7 @@ export async function fetchAIVideos(query: string = "AI short film", maxResults:
     const searchRes = await fetch(
       `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(
         exactQuery
-      )}&publishedAfter=${encodeURIComponent(publishedAfter)}&maxResults=${maxResults}&order=${order}&type=video&videoCategoryId=1&relevanceLanguage=${relevanceLanguage}&regionCode=${regionCode}&key=${API_KEY}`,
+      )}&publishedAfter=${encodeURIComponent(publishedAfter)}&maxResults=${maxResults}&order=${order}&type=video&videoCategoryId=1&relevanceLanguage=${relevanceLanguage}&regionCode=${regionCode}&safeSearch=strict&key=${API_KEY}`,
       { headers: { 'Referer': 'https://gencine.org/' } }
     );
 
@@ -104,6 +104,23 @@ export async function fetchAIVideos(query: string = "AI short film", maxResults:
     const results = await Promise.all(
       videoData.items.map(async (item: any) => {
         const snippet = item.snippet;
+
+        // Skip non-embeddable or age-restricted videos to prevent iframe playback errors
+        if (item.status && item.status.embeddable === false) {
+          console.log(`[Validation Drop] Video not embeddable: "${snippet.title}"`);
+          return null;
+        }
+        if (item.contentDetails?.contentRating?.ytRating === 'ytAgeRestricted') {
+          console.log(`[Validation Drop] Video is age-restricted: "${snippet.title}"`);
+          return null;
+        }
+
+        // Prevent live streams
+        if (snippet.liveBroadcastContent === "live" || snippet.liveBroadcastContent === "upcoming") {
+          console.log(`[Validation Drop] Live/Upcoming video: "${snippet.title}"`);
+          return null;
+        }
+
         const durationSec = getDurationSeconds(item.contentDetails.duration);
         const title = snippet.title.toLowerCase();
         const desc = snippet.description.toLowerCase();
