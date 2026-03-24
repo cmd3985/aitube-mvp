@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/fetch-youtube",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/fetch-channels",
+      "schedule": "0 3 * * *"
     }
   ]
 }
