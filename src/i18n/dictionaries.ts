@@ -56,6 +56,7 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     privacyPolicy: "Privacy Policy",
     submitFilm: "Submit Film",
     submitDesc: "Showcase your hidden AI masterpiece to the global audience. Approvals usually take 24-48 hours.",
+    appShortcut: "App",
   },
   KO: {
     home: "홈",
@@ -112,6 +113,7 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     privacyPolicy: "개인정보 처리방침",
     submitFilm: "출품하기",
     submitDesc: "전 세계 관객에게 당신의 숨겨진 AI 명작을 선보이세요. 심사에는 보통 24~48시간이 소요됩니다.",
+    appShortcut: "앱 단축키",
   },
   JA: {
     home: "ホーム",
@@ -168,6 +170,7 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     privacyPolicy: "プライバシーポリシー",
     submitFilm: "出品する",
     submitDesc: "あなたの隠れたAIの傑作を世界中の視聴者に披露しましょう。審査には通常24〜48時間かかります。",
+    appShortcut: "アプリ",
   },
   ES: {
     home: "Inicio",
@@ -224,6 +227,7 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     privacyPolicy: "Política de Privacidad",
     submitFilm: "Enviar Película",
     submitDesc: "Muestra tu obra maestra oculta de IA a la audiencia global. Las aprobaciones suelen tardar entre 24 y 48 horas.",
+    appShortcut: "App",
   },
   FR: {
     home: "Accueil",
@@ -280,6 +284,7 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     privacyPolicy: "Politique de confidentialité",
     submitFilm: "Soumettre un film",
     submitDesc: "Présentez votre chef-d'œuvre d'IA caché au public mondial. Les approbations prennent généralement 24 à 48 heures.",
+    appShortcut: "App",
   },
   PT: {
     home: "Início",
@@ -336,6 +341,7 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     privacyPolicy: "Política de Privacidade",
     submitFilm: "Enviar Filme",
     submitDesc: "Mostre sua obra-prima oculta de IA para o público global. As aprovações geralmente levam de 24 a 48 horas.",
+    appShortcut: "App",
   },
   ZH: {
     home: "首页",
@@ -392,6 +398,7 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     privacyPolicy: "隐私政策",
     submitFilm: "提交影片",
     submitDesc: "向全球观众展示您隐藏的AI杰作。审批通常需要24-48小时。",
+    appShortcut: "小程序",
   },
   HI: {
     home: "मुख्य पृष्ठ",
@@ -448,6 +455,7 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     privacyPolicy: "गोपनीयता नीति",
     submitFilm: "फ़िल्म सबमिट करें",
     submitDesc: "वैश्विक दर्शकों के सामने अपनी छिपी हुई एआई उत्कृष्ट कृति का प्रदर्शन करें। अनुमोदन में आमतौर पर 24-48 घंटे लगते हैं。",
+    appShortcut: "ऐप",
   },
   AR: {
     home: "الرئيسية",
@@ -504,6 +512,7 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     privacyPolicy: "سياسة الخصوصية",
     submitFilm: "تقديم فيلم",
     submitDesc: "اعرض تحفتك الفنية المخفية بالذكاء الاصطناعي للجمهور العالمي. تستغرق الموافقات عادةً من 24 إلى 48 ساعة.",
+    appShortcut: "تطبيق",
   },
   ID: {
     home: "Beranda",
@@ -560,6 +569,7 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     privacyPolicy: "Kebijakan Privasi",
     submitFilm: "Kirim Film",
     submitDesc: "Pamerkan mahakarya AI tersembunyi Anda kepada audiens global. Persetujuan biasanya memakan waktu 24-48 jam.",
+    appShortcut: "Aplikasi",
   },
   RU: {
     home: "Главная",
@@ -616,6 +626,7 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     privacyPolicy: "Политика конфиденциальности",
     submitFilm: "Отправить фильм",
     submitDesc: "Покажите свой скрытый шедевр ИИ мировой аудитории. Одобрение обычно занимает 24-48 часов.",
+    appShortcut: "Приложение",
   },
   DE: {
     home: "Startseite",
@@ -672,5 +683,6 @@ export const dictionaries: Record<SupportedLanguage, Record<string, string>> = {
     privacyPolicy: "Datenschutzrichtlinie",
     submitFilm: "Film einreichen",
     submitDesc: "Präsentieren Sie dem weltweiten Publikum Ihr verborgenes KI-Meisterwerk. Genehmigungen dauern in der Regel 24-48 Stunden.",
+    appShortcut: "App",
   }
 };

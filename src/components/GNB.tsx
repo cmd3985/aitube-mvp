@@ -166,10 +166,10 @@ export function GNB() {
             <button 
               onClick={handleInstallClick}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-neon-blue/20 to-neon-purple/20 border border-neon-blue/50 hover:bg-neon-blue/20 transition-all text-sm font-medium text-neon-blue shadow-[0_0_10px_rgba(0,242,254,0.3)]"
-              title="앱 설치하기"
+              title={t("appShortcut")}
             >
               <MonitorSmartphone className="w-4 h-4" />
-              <span className="hidden sm:inline">앱 단축키</span>
+              <span className="hidden sm:inline">{t("appShortcut")}</span>
             </button>
 
             {/* Auth Section */}
