@@ -100,6 +100,8 @@ export default function AdminDashboard() {
       if (res.ok) {
         setChannels([data.channel, ...channels]);
         setNewChannelInput("");
+        // Kick off asynchronous full-channel sync without blocking UI
+        triggerFullSync(data.channel.channel_id, data.channel.title);
       } else {
         alert(data.error);
       }
@@ -107,6 +109,47 @@ export default function AdminDashboard() {
       alert(err.message);
     } finally {
       setIsAddingChannel(false);
+    }
+  };
+
+  // Iteratively sync all past videos for a newly registered channel
+  const triggerFullSync = async (channelId: string, channelTitle: string) => {
+    let pageToken: string | null = null;
+    let keepFetching = true;
+    let pageCount = 1;
+
+    console.log(`[SYNC] Starting full backfill for ${channelTitle}...`);
+
+    while (keepFetching) {
+      try {
+        const body: any = { channel_id: channelId };
+        if (pageToken) body.pageToken = pageToken;
+
+        const res = await fetch("/api/admin/channels/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+
+        if (!res.ok) {
+          console.error(`[SYNC] Failed at page ${pageCount}`);
+          break;
+        }
+
+        const data = await res.json();
+        console.log(`[SYNC] Page ${pageCount} processed ${data.processed_count} videos, upserted ${data.upserted_count}`);
+
+        if (data.nextPageToken) {
+          pageToken = data.nextPageToken;
+          pageCount++;
+        } else {
+          keepFetching = false;
+          console.log(`[SYNC] Finished backfill for ${channelTitle}.`);
+        }
+      } catch (err) {
+        console.error("[SYNC] Network error during full sync:", err);
+        break;
+      }
     }
   };
 

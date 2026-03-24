@@ -1,0 +1,174 @@
+import { NextResponse } from "next/server";
+import { fetchChannelUploadsPage } from "@/lib/youtube";
+import { supabase } from "@/lib/supabase";
+import LanguageDetect from 'languagedetect';
+
+export async function POST(req: Request) {
+  try {
+    const { channel_id, pageToken } = await req.json();
+    if (!channel_id) return NextResponse.json({ error: "channel_id is required" }, { status: 400 });
+
+    const { results: rawVideos, nextPageToken, error: fetchError } = await fetchChannelUploadsPage(channel_id, pageToken);
+
+    if (fetchError) {
+      return NextResponse.json({ error: "YouTube API Error" }, { status: 500 });
+    }
+
+    const detector = new LanguageDetect();
+    let totalUpserted = 0;
+    const processedVideos = [];
+
+    // Shared Filtering Logic (omitting views/likes threshold)
+    for (const v of rawVideos) {
+      const titleLower = v.title.toLowerCase();
+      const descLower = v.description.toLowerCase();
+      const fullText = (titleLower + " " + descLower);
+
+      // STEP 1: Blacklist
+      const blacklist = [
+        "결말포함", "영화리뷰", "명작", "요약", "몰아보기", "스포", "평론", "후기", "리뷰", "수상 소감", "메이킹", "비하인드", "튜토리얼", "강의", "만드는 법", "만드는법", "제작기", "제작 과정", "제작과정", "노하우", "꿀팁", "팁", "강좌", "가이드", "수익창출", "돈 버는", "돈버는", "부업", "클래스", "사용법", "활용법", "기초", "입문", "추천", "소개", "플랫폼", "사이트", "공모전", "만들기", "방법", "도구", "무료", "수업", "단계", "테스트", "활용", "방법", "툴", "촬영 감독", "메이크업", "안무가", "스타일리스트", "뮤직비디오", // KO
+        "ending explained", "recap", "movie review", "explained", "summary", "reaction", "how to", "tutorial", "vlog", "behind the scenes", "making of", "review", "tips", "guide", "course", "workflow", "how i made", "how i make", "process", "make money", "passive income", "bts", "best ai", "top 10", "free tool", "software", "platform", "website", "beginner", "introduction", "basics", "step by step", "steps", "demo", "promt", "prompt", "cameraman", "make-up", "makeup", "choreography", "playback singer", "child artist", "costume designer", "music label", "official music video", "official trailer", "star cast", "starring:", "staring ", "starring ", "cast:", "cast -", "dop :", "dop -", "production house", "all rights reserved", "music director", "singer -", "singer :", "label :", "label -", "dubbed movie", "bhojpuri movie", "haryanvi movie", "punjabi movie", "south movie", "new hindi movie", "full hd movie", "artists -", "artists :", "buy link", "meesho.com", "amazon.com", // EN
+        "ネタバレ", "レビュー", "結末", "解説", "要約", "反応", "作り方", "メイキング", "ヒント", "裏側", "稼ぎ方", "講座", // JA
+        "resumen", "reseña", "final explicado", "crítica", "résumé", "fin expliquée", "resumo", "tutorial", "cómo hacer", "consejos", "trucos", "detrás de cámaras", "tutoriel", "tuto", "coulisses", "astuces", "dicas", "como fazer", // ES/FR/PT
+        "解说", "影评", "结局", "剧透", "解說", "影評", "스포일러", "समीक्षा", "स्पष्टीकरण", "教程", "幕后", "技巧", "赚钱", "怎么做", "ट्यूटोरियल", "सुझाव", // ZH/HI
+        "مراجعة فيلم", "نهاية مشروحة", "الجزء", "ملخص", "شرح", "كيف تصنع", "نصائح", "دورة", // AR
+        "ulasan film", "penjelasan akhir", "alur cerita", "tutorial", "cara membuat", "tips", // ID
+        "обзор фильма", "концовка объяснение", "краткий пересказ", "объяснение", "туториал", "как сделать", "советы", // RU
+        "filmkritik", "ende erklärt", "zusammenfassung", "erklärung", "tutorial", "tipps", "wie man", "hinter den kulissen" // DE
+      ];
+      const isBlacklisted = blacklist.some(p => fullText.includes(p));
+      const channelLower = (v.channelTitle || "").toLowerCase();
+      const channelIsReview = channelLower.includes("review") || channelLower.includes("recap") || channelLower.includes("리뷰");
+      
+      if (isBlacklisted || channelIsReview) continue;
+
+      // STEP 2: Whitelist & LLM Check
+      const whitelist = [
+        "ai short film", "ai movie", "ai cinematic", "ai webdrama", "full ai film", "ai generated film",
+        "ai 단편영화", "ai 영화", "ai 웹드라마", "ai 애니메이션", "ai 시네마",
+        "ai短編映画", "ai映画", "aiアニメ", "ai生成動画", "フルai映画",
+        "cortometraje ai", "cortometraje ia", "película ai", "película ia", "court métrage ia", "film ia", "curta-metragem ia", "filme ia",
+        "ai短片", "ai电影", "ai微电影", "ai生成视频", "ai 微電影", "ai 生成視頻", "ai शॉर्ट फिल्म", "ai फिल्म",
+        "فيلم قصير بالذكاء الاصطناعي", "فيلم ذكاء اصطناعي",
+        "film pendek ai", "film ai",
+        "ии короткометражный фильм", "ии фильм", "ki kurzfilm", "ki film"
+      ];
+      const isWhitelisted = whitelist.some(p => titleLower.includes(p) || descLower.includes(p));
+
+      if (!isWhitelisted) {
+        if (process.env.OPENAI_API_KEY) {
+          try {
+            const llmRes = await fetch("https://api.openai.com/v1/chat/completions", {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                model: "gpt-4o-mini",
+                messages: [
+                  { role: "system", content: "당신은 영상 판별 전문가입니다. 제목과 설명을 보고, 이 영상이 오직 생성형 AI 툴(Midjourney, Runway, Veo, Sora 등)로 직접 제작된 영상물인지 판별하세요. 1) 상업 영화 리뷰/다큐/뉴스, 2) 언리얼 엔진이나 블렌더 등으로 만든 일반적인 3D/인디 애니메이션(명시적인 AI 언급이 없는 경우), 3) AI 툴 튜토리얼이나 추천 쇼케이스 영상이라면 무조건 ABOUT-AI로 답하세요. 오직 AI로 직접 만든 창작 영화/영상물만 MADE-WITH-AI로 대답하세요." },
+                  { role: "user", content: `제목: ${v.title}\n설명: ${v.description}` }
+                ],
+                max_tokens: 10,
+                temperature: 0
+              })
+            });
+            const llmData = await llmRes.json();
+            if (llmData.choices?.[0]?.message?.content?.trim() !== "MADE-WITH-AI") {
+              continue;
+            }
+          } catch(e) { continue; }
+        }
+      }
+
+      // Calculate language
+      let language = "영어";
+      const getLatinScore = (regex: RegExp) => (fullText.match(regex) || []).length;
+      const getNonLatinScore = (regex: RegExp) => (fullText.match(regex) || []).length * 3;
+
+      const kanaScore = getNonLatinScore(/[\u3040-\u309F\u30A0-\u30FF]/g);
+      const kanjiScore = getNonLatinScore(/[\u4E00-\u9FAF]/g);
+
+      if (fullText.trim().length > 0 && !(kanaScore === 0 && kanjiScore > 0)) {
+        const scores = {
+          "한국어": getNonLatinScore(/[가-힣]/g),
+          "일본어": kanaScore + (kanaScore > 0 ? kanjiScore : 0),
+          "중국어": kanjiScore,
+          "힌디어": getNonLatinScore(/[\u0900-\u097F]/g),
+          "아랍어": getNonLatinScore(/[\u0600-\u06FF]/g),
+          "러시아어": getNonLatinScore(/[а-яА-ЯёЁ]/g),
+          "latin": getLatinScore(/[a-zA-Z]/g)
+        };
+        const maxScript = Object.keys(scores).reduce((a, b) => scores[a as keyof typeof scores] > scores[b as keyof typeof scores] ? a : b);
+        if (maxScript !== "latin" && scores[maxScript as keyof typeof scores] > 10) {
+          language = maxScript;
+        } else {
+          const detected = detector.detect(fullText, 3);
+          if (detected.length > 0) {
+            const topLang = detected[0][0];
+            if (topLang === 'french') language = "프랑스어";
+            else if (topLang === 'spanish') language = "스페인어";
+            else if (topLang === 'portuguese') language = "포르투갈어";
+            else if (topLang === 'german') language = "독일어";
+            else if (topLang === 'indonesian' || topLang === 'malay') language = "인도네시아어";
+          }
+        }
+      }
+
+      const engagementScore = v.rawViewCount + (v.likeCount * 20) + (v.commentCount * 50);
+      processedVideos.push({ ...v, language, engagementScore });
+    }
+
+    // Insert into Supabase
+    for (const video of processedVideos) {
+      const textForTags = (video.title + " " + video.description).toLowerCase();
+      const tools = [];
+      if (textForTags.includes("veo")) tools.push("Veo");
+      if (textForTags.includes("pika")) tools.push("Pika");
+      if (textForTags.includes("seedream")) tools.push("Seedream");
+      if (textForTags.includes("flux")) tools.push("FLUX");
+      if (textForTags.includes("midjourney")) tools.push("Midjourney");
+      if (textForTags.includes("runway") || textForTags.includes("gen-3")) tools.push("Runway");
+      if (textForTags.includes("haiper")) tools.push("Haiper");
+      if (textForTags.includes("kling")) tools.push("Kling");
+
+      const { error: upsertError } = await supabase
+        .from("videos")
+        .upsert({
+          youtube_id: video.id,
+          title: video.title,
+          description: video.description,
+          thumbnail_url: video.thumbnail,
+          duration: video.duration,
+          view_count: video.rawViewCount,
+          category: "AI",
+          published_at: new Date().toISOString(), // Use import time to bypass published_at sorting anomalies
+          ai_tool_tags: tools,
+          channel_title: video.channelTitle,
+          language: video.language,
+          like_count: video.likeCount,
+          comment_count: video.commentCount,
+          engagement_score: video.engagementScore,
+          is_cc: video.is_cc,
+          status: "published"
+        }, { onConflict: "youtube_id" });
+
+      if (!upsertError) totalUpserted++;
+    }
+
+    // Mark channels as fetched
+    await supabase.from('monitored_channels').update({ last_fetched_at: new Date().toISOString() }).eq('channel_id', channel_id);
+
+    return NextResponse.json({ 
+      success: true, 
+      processed_count: rawVideos.length,
+      upserted_count: totalUpserted,
+      nextPageToken: nextPageToken
+    });
+
+  } catch (err: any) {
+    console.error("Manual Channel Sync Error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}

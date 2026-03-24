@@ -286,3 +286,65 @@ export async function fetchChannelLatestVideos(channelId: string, maxResults: nu
     return [];
   }
 }
+
+// Efficiently fetch a page of videos from a channel's "Uploads" playlist
+export async function fetchChannelUploadsPage(channelId: string, pageToken?: string) {
+  try {
+    // The "Uploads" playlist ID replaces the 'UC' prefix with 'UU'
+    const uploadsPlaylistId = "UU" + channelId.substring(2);
+    
+    let url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=50&key=${API_KEY}`;
+    if (pageToken) url += `&pageToken=${pageToken}`;
+
+    const playlistRes = await fetch(url, { headers: { 'Referer': 'https://gencine.org/' }, cache: 'no-store' });
+    if (!playlistRes.ok) throw new Error("Failed to fetch playlist items");
+    
+    const playlistData = await playlistRes.json();
+    if (!playlistData.items || playlistData.items.length === 0) {
+      return { results: [], nextPageToken: null };
+    }
+
+    const videoIds = playlistData.items.map((item: any) => item.snippet.resourceId.videoId).join(",");
+    
+    const detailsRes = await fetch(
+      `${BASE_URL}/videos?part=snippet,contentDetails,statistics,player,status&id=${videoIds}&key=${API_KEY}`,
+      { headers: { 'Referer': 'https://gencine.org/' }, cache: 'no-store' }
+    );
+    
+    if (!detailsRes.ok) throw new Error("Failed to fetch video details");
+    const detailsData = await detailsRes.json();
+
+    const results: YouTubeVideoInfo[] = [];
+
+    for (const playlistItem of playlistData.items) {
+      const item = detailsData.items?.find((i: any) => i.id === playlistItem.snippet.resourceId.videoId);
+      if (!item) continue;
+      if (!item.status?.embeddable || !item.status?.publicStatsViewable) continue;
+
+      const durationSec = getDurationSeconds(item.contentDetails.duration);
+      if (durationSec < 60) continue; // Skip shorts
+
+      const is_cc = item.status.license === 'creativeCommon';
+
+      results.push({
+        id: item.id,
+        title: item.snippet.title,
+        description: item.snippet.description,
+        thumbnail: item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.default?.url || "",
+        duration: parseDuration(item.contentDetails.duration),
+        views: formatViews(item.statistics.viewCount || "0"),
+        rawViewCount: parseInt(item.statistics.viewCount || "0"),
+        likeCount: parseInt(item.statistics.likeCount || "0"),
+        commentCount: parseInt(item.statistics.commentCount || "0"),
+        channelTitle: item.snippet.channelTitle, // Sometimes empty in playlist items, but detailsData should have it
+        is_cc
+      });
+    }
+
+    return { results, nextPageToken: playlistData.nextPageToken || null };
+  } catch (error) {
+    console.error("fetchChannelUploadsPage error:", error);
+    return { results: [], nextPageToken: null, error };
+  }
+}
+
