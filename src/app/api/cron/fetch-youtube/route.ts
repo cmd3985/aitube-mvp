@@ -171,14 +171,17 @@ export async function GET(req: Request) {
       let language = "영어"; // default
       
       {
-        // Alphabet Frequency Scoring (Non-Latin Titles weighted 100x so they strictly override generic English keywords, Latin gets 1x)
-        const getNonLatinScore = (regex: RegExp) => (v.title.match(regex) || []).length * 100 + (v.description.match(regex) || []).length;
-        const getLatinScore = (regex: RegExp) => (v.title.match(regex) || []).length * 1 + (v.description.match(regex) || []).length;
+        // Alphabet Frequency Scoring (Non-Latin Titles weighted 500x so they strictly override generic English keywords, Latin gets 1x / 5 density norm)
+        const getNonLatinScore = (regex: RegExp) => (v.title.match(regex) || []).length * 500 + (v.description.match(regex) || []).length;
+        const getLatinScore = (regex: RegExp) => Math.floor(((v.title.match(regex) || []).length * 1 + (v.description.match(regex) || []).length) / 5);
         
+        const kanaScore = getNonLatinScore(/[ぁ-んァ-ン]/g);
+        const kanjiScore = getNonLatinScore(/[\u4e00-\u9fa5]/g);
+
         const scores = {
           "한국어": getNonLatinScore(/[가-힣]/g),
-          "일본어": getNonLatinScore(/[ぁ-んァ-ン]/g),
-          "중국어": getNonLatinScore(/[\u4e00-\u9fa5]/g),
+          "일본어": kanaScore + (kanaScore > 0 ? kanjiScore : 0),
+          "중국어": kanjiScore,
           "힌디어": getNonLatinScore(/[\u0900-\u097F]/g),
           "아랍어": getNonLatinScore(/[\u0600-\u06FF]/g),
           "러시아어": getNonLatinScore(/[а-яА-ЯёЁ]/g),
