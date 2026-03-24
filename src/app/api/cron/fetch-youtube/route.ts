@@ -93,8 +93,8 @@ export async function GET(req: Request) {
 
       // --- STEP 1: Multi-lingual Blacklist (Drop, Cost 0) ---
       const blacklist = [
-        "결말포함", "영화리뷰", "명작", "요약", "몰아보기", "스포", "평론", "후기", "리뷰", "수상 소감", "메이킹", "비하인드", "튜토리얼", "강의", "만드는 법", "만드는법", "제작기", "제작 과정", "제작과정", "노하우", "꿀팁", "팁", "강좌", "가이드", "수익창출", "돈 버는", "돈버는", "부업", "클래스", // KO
-        "ending explained", "recap", "movie review", "explained", "summary", "reaction", "how to", "tutorial", "vlog", "behind the scenes", "making of", "review", "tips", "guide", "course", "workflow", "how i made", "how i make", "process", "make money", "passive income", "bts", // EN
+        "결말포함", "영화리뷰", "명작", "요약", "몰아보기", "스포", "평론", "후기", "리뷰", "수상 소감", "메이킹", "비하인드", "튜토리얼", "강의", "만드는 법", "만드는법", "제작기", "제작 과정", "제작과정", "노하우", "꿀팁", "팁", "강좌", "가이드", "수익창출", "돈 버는", "돈버는", "부업", "클래스", "사용법", "활용법", "기초", "입문", "추천", "소개", "플랫폼", "사이트", "공모전", "만들기", "방법", "도구", "무료", "수업", "단계", "테스트", "활용", "방법", "툴", // KO
+        "ending explained", "recap", "movie review", "explained", "summary", "reaction", "how to", "tutorial", "vlog", "behind the scenes", "making of", "review", "tips", "guide", "course", "workflow", "how i made", "how i make", "process", "make money", "passive income", "bts", "best ai", "top 10", "free tool", "software", "platform", "website", "beginner", "introduction", "basics", "step by step", "steps", "demo", "promt", "prompt", // EN
         "ネタバレ", "レビュー", "結末", "解説", "要約", "反応", "作り方", "メイキング", "ヒント", "裏側", "稼ぎ方", "講座", // JA
         "resumen", "reseña", "final explicado", "crítica", "résumé", "fin expliquée", "resumo", "tutorial", "cómo hacer", "consejos", "trucos", "detrás de cámaras", "tutoriel", "tuto", "coulisses", "astuces", "dicas", "como fazer", // ES/FR/PT
         "解说", "影评", "结局", "剧透", "解說", "影評", "스포일러", "समीक्षा", "स्पष्टीकरण", "教程", "幕后", "技巧", "赚钱", "怎么做", "ट्यूटोरियल", "सुझाव", // ZH/HI
