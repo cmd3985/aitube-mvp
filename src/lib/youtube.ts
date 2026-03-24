@@ -229,3 +229,60 @@ export async function fetchAIVideos(query: string = "AI short film", maxResults:
     return [];
   }
 }
+
+export async function fetchChannelLatestVideos(channelId: string, maxResults: number = 5): Promise<YouTubeVideoInfo[]> {
+  try {
+    const searchRes = await fetch(
+      `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&order=date&type=video&maxResults=${maxResults}&key=${API_KEY}`,
+      { headers: { 'Referer': 'https://gencine.org/' }, cache: 'no-store' }
+    );
+
+    if (!searchRes.ok) throw new Error("Failed to fetch channel search");
+    const searchData = await searchRes.json();
+    if (!searchData.items || searchData.items.length === 0) return [];
+    
+    const videoIds = searchData.items.map((item: any) => item.id.videoId).join(",");
+    
+    const detailsRes = await fetch(
+      `${BASE_URL}/videos?part=snippet,contentDetails,statistics,player,status&id=${videoIds}&key=${API_KEY}`,
+      { headers: { 'Referer': 'https://gencine.org/' }, cache: 'no-store' }
+    );
+    
+    if (!detailsRes.ok) throw new Error("Failed to fetch channel video details");
+    const detailsData = await detailsRes.json();
+
+    const results: YouTubeVideoInfo[] = [];
+
+    for (const searchItem of searchData.items) {
+      const item = detailsData.items?.find((i: any) => i.id === searchItem.id.videoId);
+      if (!item) continue;
+
+      if (!item.status?.embeddable || !item.status?.publicStatsViewable) continue;
+
+      const durationSec = getDurationSeconds(item.contentDetails.duration);
+      if (durationSec < 60) continue; // Skip shorts
+
+      // Parse CC status
+      const is_cc = item.status.license === 'creativeCommon';
+
+      results.push({
+        id: item.id,
+        title: item.snippet.title,
+        description: item.snippet.description,
+        thumbnail: item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.default?.url || "",
+        duration: parseDuration(item.contentDetails.duration),
+        views: formatViews(item.statistics.viewCount || "0"),
+        rawViewCount: parseInt(item.statistics.viewCount || "0"),
+        likeCount: parseInt(item.statistics.likeCount || "0"),
+        commentCount: parseInt(item.statistics.commentCount || "0"),
+        channelTitle: item.snippet.channelTitle,
+        is_cc
+      });
+    }
+
+    return results;
+  } catch (error) {
+    console.error("fetchChannelLatestVideos error:", error);
+    return [];
+  }
+}
