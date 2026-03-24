@@ -1,18 +1,18 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY!;
-
-const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
-  auth: { persistSession: false }
-});
-
 export const maxDuration = 300; // Allow 5 minutes for processing thousands of videos
 
 export async function GET(req: Request) {
   try {
+    const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY!;
+
+    const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
+      auth: { persistSession: false }
+    });
+    
     const { searchParams } = new URL(req.url);
     const keyParam = searchParams.get("key");
     const secret = process.env.CRON_SECRET;

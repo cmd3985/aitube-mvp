@@ -75,6 +75,7 @@ export default async function WatchPage({ params }: { params: Promise<{ id: stri
     ai_tool_tags: Array.isArray(v.ai_tool_tags) ? v.ai_tool_tags.join(",") : v.ai_tool_tags,
     language: !v.language || v.language === "Unknown" ? "영어" : v.language,
     engagementScore: v.engagement_score || 0,
+    is_cc: !!v.is_cc,
   });
 
   const videoData = formatVideo(video);
