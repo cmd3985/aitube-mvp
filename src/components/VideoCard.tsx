@@ -233,7 +233,7 @@ export function VideoCard({ video, onClick }: { video: VideoProps, onClick?: () 
         <div className="p-4 flex-grow flex flex-col justify-between">
           <h3 className="text-sm font-medium text-white line-clamp-2 leading-tight mb-2 group-hover:text-neon-blue transition-colors">
             {video.is_cc && (
-              <span className="inline-block px-1.5 py-0.5 mr-1.5 align-middle text-[9px] tracking-wide font-bold bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/30 rounded" title="Creative Commons (2차 창작 가능)">
+              <span className="inline-block px-1.5 py-0.5 mr-1.5 align-middle text-[9px] tracking-wide font-bold bg-neon-blue/20 text-neon-blue border border-neon-blue/30 rounded" title="Creative Commons (2차 창작 가능)">
                 CC
               </span>
             )}

@@ -81,7 +81,7 @@ export function WatchContent({ video, recommended }: { video: WatchVideoData; re
         {/* Title */}
         <h1 className="text-2xl md:text-3xl font-bold leading-snug mb-4 flex items-start gap-3">
           {video.is_cc && (
-            <span className="shrink-0 mt-1 px-2 py-0.5 text-sm font-bold bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/30 rounded" title="Creative Commons (2차 창작 가능)">
+            <span className="shrink-0 mt-1 px-2 py-0.5 text-sm font-bold bg-neon-blue/20 text-neon-blue border border-neon-blue/30 rounded" title="Creative Commons (2차 창작 가능)">
               CC
             </span>
           )}

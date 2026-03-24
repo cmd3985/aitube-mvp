@@ -156,11 +156,11 @@ export function FilterBar({
           <button
             onClick={() => onCCChange && onCCChange(!activeCC)}
             className={`relative px-4 rounded-lg text-sm font-bold transition-all border flex items-center justify-center
-              ${activeCC ? "bg-neon-cyan/20 text-neon-cyan border-neon-cyan/50 shadow-[0_0_10px_rgba(0,255,255,0.3)]" : "text-gray-400 border-white/10 hover:text-white glass"}
+              ${activeCC ? "bg-neon-blue/20 text-neon-blue border-neon-blue/50 shadow-[0_0_10px_rgba(0,242,254,0.3)]" : "text-gray-400 border-white/10 hover:text-white glass"}
             `}
             title="Creative Commons (2차 창작 가능)"
           >
-            <span className={`text-[11px] px-1.5 py-0.5 rounded-sm shrink-0 ${activeCC ? "bg-neon-cyan text-black" : "bg-gray-700 text-white"}`}>CC</span>
+            <span className={`text-[11px] px-1.5 py-0.5 rounded-sm shrink-0 ${activeCC ? "bg-neon-blue text-black" : "bg-gray-700 text-white"}`}>CC</span>
           </button>
 
           {/* Sort Dropdown */}
