@@ -27,22 +27,16 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
     }
   };
 
-  const defaultLangFilter = getDefaultLanguageFilter(lang);
+  // Session defaults
+  const defaultSortFilter = typeof window !== 'undefined' ? sessionStorage.getItem('gencine_sort') || 'popular' : 'popular';
+  const defaultDurFilter = typeof window !== 'undefined' ? sessionStorage.getItem('gencine_duration') || 'All' : 'All';
+  const defaultLangFilter = typeof window !== 'undefined' ? sessionStorage.getItem('gencine_lang') || getDefaultLanguageFilter(lang) : getDefaultLanguageFilter(lang);
+  const defaultCCFilter = typeof window !== 'undefined' ? sessionStorage.getItem('gencine_cc') === 'true' : false;
 
-  const [activeSort, setActiveSortState] = useState("popular");
-  const [activeDuration, setActiveDurationState] = useState("All");
+  const [activeSort, setActiveSortState] = useState(defaultSortFilter);
+  const [activeDuration, setActiveDurationState] = useState(defaultDurFilter);
   const [activeLanguage, setActiveLanguageState] = useState(defaultLangFilter);
-
-  // Load saved state (Client-side only) to prevent SSR hydration errors
-  useEffect(() => {
-    const savedSort = sessionStorage.getItem('gencine_sort');
-    const savedDur = sessionStorage.getItem('gencine_duration');
-    const savedLang = sessionStorage.getItem('gencine_lang');
-    
-    if (savedSort) setActiveSortState(savedSort);
-    if (savedDur) setActiveDurationState(savedDur);
-    if (savedLang) setActiveLanguageState(savedLang);
-  }, []);
+  const [activeCC, setActiveCCState] = useState(defaultCCFilter);
 
   const setActiveSort = (val: string) => {
     setActiveSortState(val);
@@ -57,6 +51,11 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
   const setActiveLanguage = (val: string) => {
     setActiveLanguageState(val);
     if (typeof window !== 'undefined') sessionStorage.setItem('gencine_lang', val);
+  };
+
+  const setActiveCC = (val: boolean) => {
+    setActiveCCState(val);
+    if (typeof window !== 'undefined') sessionStorage.setItem('gencine_cc', val ? 'true' : 'false');
   };
 
   const initialLang = useRef(lang);
@@ -75,10 +74,10 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
   // SWR Infinite Pagination
   const getKey = (pageIndex: number, previousPageData: any) => {
     if (previousPageData && !previousPageData.nextPage) return null; // Reached end
-    return `/api/videos?page=${pageIndex + 1}&sort=${activeSort}&duration=${encodeURIComponent(activeDuration)}&language=${encodeURIComponent(activeLanguage)}`;
+    return `/api/videos?page=${pageIndex + 1}&sort=${activeSort}&duration=${encodeURIComponent(activeDuration)}&language=${encodeURIComponent(activeLanguage)}&cc=${activeCC}`;
   };
 
-  const isDefaultFetch = activeSort === "popular" && activeDuration === "All" && activeLanguage === defaultLangFilter;
+  const isDefaultFetch = activeSort === "popular" && activeDuration === "All" && activeLanguage === defaultLangFilter && !activeCC;
 
   const { data, size, setSize, isValidating } = useSWRInfinite(getKey, fetcher, {
     fallbackData: isDefaultFetch 
@@ -118,6 +117,8 @@ export function HomeContent({ initialVideos }: { initialVideos: VideoProps[] }) 
         onDurationChange={setActiveDuration}
         activeLanguage={activeLanguage}
         onLanguageChange={setActiveLanguage}
+        activeCC={activeCC}
+        onCCChange={setActiveCC}
       />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

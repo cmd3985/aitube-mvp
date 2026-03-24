@@ -8,10 +8,15 @@ export async function GET(request: Request) {
   const sort = searchParams.get('sort') || 'popular';
   const duration = searchParams.get('duration') || 'All';
   const language = searchParams.get('language') || 'All';
+  const cc = searchParams.get('cc') === 'true';
 
   // Route strictly to the PostgreSQL view for trending sorting
   const tableName = sort === 'trending' ? 'trending_videos' : 'videos';
   let query = supabase.from(tableName).select('*').eq('status', 'published');
+
+  if (cc) {
+    query = query.eq('is_cc', true);
+  }
 
   // 1. Language Filter
   if (language !== 'All' && language) {

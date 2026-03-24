@@ -33,15 +33,19 @@ export function FilterBar({
   activeDuration = "All",
   onDurationChange,
   activeLanguage = "All",
-  onLanguageChange
+  onLanguageChange,
+  activeCC = false,
+  onCCChange
 }: { 
   onSortChange?: (sort: string) => void;
   activeDuration?: string;
   onDurationChange?: (duration: string) => void;
   activeLanguage?: string;
   onLanguageChange?: (lang: string) => void;
+  activeCC?: boolean;
+  onCCChange?: (cc: boolean) => void;
 }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [activeSort, setActiveSort] = useState("popular");
   const [isSortOpen, setIsSortOpen] = useState(false);
 
@@ -89,12 +93,27 @@ export function FilterBar({
           <Globe className="w-4 h-4" />
           <span className="text-sm font-medium">{t("language")}</span>
         </div>
-        {LANGUAGES.map((lang) => {
-          const isActive = activeLanguage === lang;
+        
+        {/* CC Toggle */}
+        <button
+          onClick={() => onCCChange && onCCChange(!activeCC)}
+          className={`relative px-4 py-2 rounded-full text-sm font-bold transition-all border flex items-center gap-1.5
+            ${activeCC ? "bg-neon-cyan/20 text-neon-cyan border-neon-cyan/50 shadow-[0_0_10px_rgba(0,255,255,0.3)]" : "text-gray-400 border-white/10 hover:text-white glass"}
+          `}
+          title="Show only videos allowing secondary creation"
+        >
+          <span className={`text-[10px] px-1 rounded-sm shrink-0 ${activeCC ? "bg-neon-cyan text-black" : "bg-gray-400 text-black"}`}>CC</span>
+          {lang === "KO" ? "CC 허용" : "CC Allowed"}
+        </button>
+        
+        <div className="w-px h-6 bg-white/10 mx-1 hidden sm:block"></div>
+
+        {LANGUAGES.map((langOpt) => {
+          const isActive = activeLanguage === langOpt;
           return (
             <button
-              key={lang}
-              onClick={() => onLanguageChange && onLanguageChange(lang)}
+              key={langOpt}
+              onClick={() => onLanguageChange && onLanguageChange(langOpt)}
               className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all
                 ${isActive ? "text-white" : "text-gray-400 hover:text-white glass"}
               `}
