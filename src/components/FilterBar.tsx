@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createClient } from "@/utils/supabase/client";
 import { motion } from "framer-motion";
 import { Globe, ChevronDown, Filter, Clock, Flame, Calendar, PlaySquare } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
@@ -48,6 +49,22 @@ export function FilterBar({
   const { t, lang } = useLanguage();
   const [activeSort, setActiveSort] = useState("popular");
   const [isSortOpen, setIsSortOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user?.email) return;
+      
+      const envEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS || "";
+      const adminEmails = envEmails.split(",").map(e => e.trim());
+      if (adminEmails.includes(session.user.email)) {
+        setIsAdmin(true);
+      }
+    };
+    checkAdmin();
+  }, [supabase.auth]);
 
   const SORT_OPTIONS = [
     { id: "popular", label: t("popular"), icon: Flame },
@@ -149,19 +166,20 @@ export function FilterBar({
           })}
         </div>
 
-        {/* Action Container: CC Toggle + Sort Dropdown */}
         <div className="flex items-stretch gap-3 w-full md:w-auto h-[46px]">
           
-          {/* Restyled CC Toggle Button */}
-          <button
-            onClick={() => onCCChange && onCCChange(!activeCC)}
-            className={`relative px-4 rounded-lg text-sm font-bold transition-all border flex items-center justify-center
-              ${activeCC ? "bg-neon-blue/20 text-neon-blue border-neon-blue/50 shadow-[0_0_10px_rgba(0,242,254,0.3)]" : "text-gray-400 border-white/10 hover:text-white glass"}
-            `}
-            title="Creative Commons (2차 창작 가능)"
-          >
-            <span className={`text-[11px] px-1.5 py-0.5 rounded-sm shrink-0 ${activeCC ? "bg-neon-blue text-black" : "bg-gray-700 text-white"}`}>CC</span>
-          </button>
+          {/* Restyled CC Toggle Button (Admin Only) */}
+          {isAdmin && (
+            <button
+              onClick={() => onCCChange && onCCChange(!activeCC)}
+              className={`relative px-4 rounded-lg text-sm font-bold transition-all border flex items-center justify-center
+                ${activeCC ? "bg-neon-blue/20 text-neon-blue border-neon-blue/50 shadow-[0_0_10px_rgba(0,242,254,0.3)]" : "text-gray-400 border-white/10 hover:text-white glass"}
+              `}
+              title="Creative Commons (2차 창작 가능)"
+            >
+              <span className={`text-[11px] px-1.5 py-0.5 rounded-sm shrink-0 ${activeCC ? "bg-neon-blue text-black" : "bg-gray-700 text-white"}`}>CC</span>
+            </button>
+          )}
 
           {/* Sort Dropdown */}
           <div className="relative w-full md:w-48 flex-shrink-0 z-50 h-[46px]">
