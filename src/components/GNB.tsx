@@ -62,11 +62,16 @@ export function GNB() {
   }, [supabase.auth]);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') setIsInstallable(false);
-    setDeferredPrompt(null);
+    if (deferredPrompt) {
+      // Browser supports native automated prompt (Chrome, Edge)
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') setIsInstallable(false);
+      setDeferredPrompt(null);
+    } else {
+      // Browser DOES NOT support automated prompt (Safari, Firefox, or already installed)
+      alert("현재 브라우저에서는 자동 설치가 지원되지 않거나 이미 설치되어 있습니다.\n\n[수동 설치 방법]\n- 🖥️ Mac Safari: 메뉴 막대 > 파일 > 'Dock에 추가'\n- 📱 아이폰 Safari: 하단 공유 버튼(네모 안 화살표) > '홈 화면에 추가'\n- ⭐️ 즐겨찾기 보관: Ctrl+D (Mac은 ⌘+D)");
+    }
   };
 
   const handleLogin = async () => {
@@ -157,17 +162,15 @@ export function GNB() {
               </AnimatePresence>
             </div>
 
-            {/* PWA Install Button */}
-            {isInstallable && (
-              <button 
-                onClick={handleInstallClick}
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-neon-blue/20 to-neon-purple/20 border border-neon-blue/50 hover:bg-neon-blue/20 transition-all text-sm font-medium text-neon-blue shadow-[0_0_10px_rgba(0,242,254,0.3)]"
-                title="앱 설치하기"
-              >
-                <MonitorSmartphone className="w-4 h-4" />
-                <span>앱 설치</span>
-              </button>
-            )}
+            {/* PWA Install Button (Always Visible) */}
+            <button 
+              onClick={handleInstallClick}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-neon-blue/20 to-neon-purple/20 border border-neon-blue/50 hover:bg-neon-blue/20 transition-all text-sm font-medium text-neon-blue shadow-[0_0_10px_rgba(0,242,254,0.3)]"
+              title="앱 설치하기"
+            >
+              <MonitorSmartphone className="w-4 h-4" />
+              <span className="hidden sm:inline">앱 단축키</span>
+            </button>
 
             {/* Auth Section */}
             <div className="relative flex items-center gap-2">
