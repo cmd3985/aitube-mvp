@@ -172,19 +172,23 @@ export async function GET(req: Request) {
       let language = "영어"; // default
       
       {
-        // Alphabet Regex Fast-Paths (LanguageDetect struggles with non-Latin scripts)
-        if (/[가-힣]/.test(fullText)) {
-          language = "한국어";
-        } else if (/[ぁ-んァ-ン]/.test(fullText)) {
-          language = "일본어";
-        } else if (/[\u4e00-\u9fa5]/.test(fullText)) {
-          language = "중국어";
-        } else if (/[\u0900-\u097F]/.test(fullText)) {
-          language = "힌디어";
-        } else if (/[\u0600-\u06FF]/.test(fullText)) {
-          language = "아랍어";
-        } else if (/[а-яА-ЯёЁ]/.test(fullText)) {
-          language = "러시아어";
+        // Alphabet Frequency Scoring (Titles weighted 5x)
+        const getScore = (regex: RegExp) => (v.title.match(regex) || []).length * 5 + (v.description.match(regex) || []).length;
+        
+        const scores = {
+          "한국어": getScore(/[가-힣]/g),
+          "일본어": getScore(/[ぁ-んァ-ン]/g),
+          "중국어": getScore(/[\u4e00-\u9fa5]/g),
+          "힌디어": getScore(/[\u0900-\u097F]/g),
+          "아랍어": getScore(/[\u0600-\u06FF]/g),
+          "러시아어": getScore(/[а-яА-ЯёЁ]/g),
+          "latin": getScore(/[a-zA-Z]/g)
+        };
+
+        const maxScript = Object.keys(scores).reduce((a, b) => scores[a as keyof typeof scores] > scores[b as keyof typeof scores] ? a : b);
+
+        if (maxScript !== "latin" && scores[maxScript as keyof typeof scores] > 10) {
+          language = maxScript;
         } else {
           // Use LanguageDetect for Latin-based languages
           const detected = detector.detect(fullText, 3); // top 3

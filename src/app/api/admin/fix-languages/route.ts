@@ -24,18 +24,22 @@ export async function GET(req: Request) {
       const fullText = (titleLower + " " + descLower);
 
       let newLang = "영어"; // default
-      if (/[가-힣]/.test(fullText)) {
-        newLang = "한국어";
-      } else if (/[ぁ-んァ-ン]/.test(fullText)) {
-        newLang = "일본어";
-      } else if (/[\u4e00-\u9fa5]/.test(fullText)) {
-        newLang = "중국어";
-      } else if (/[\u0900-\u097F]/.test(fullText)) {
-        newLang = "힌디어";
-      } else if (/[\u0600-\u06FF]/.test(fullText)) {
-        newLang = "아랍어";
-      } else if (/[а-яА-ЯёЁ]/.test(fullText)) {
-        newLang = "러시아어";
+      const getScore = (regex: RegExp) => ((v.title || "").match(regex) || []).length * 5 + ((v.description || "").match(regex) || []).length;
+      
+      const scores = {
+        "한국어": getScore(/[가-힣]/g),
+        "일본어": getScore(/[ぁ-んァ-ン]/g),
+        "중국어": getScore(/[\u4e00-\u9fa5]/g),
+        "힌디어": getScore(/[\u0900-\u097F]/g),
+        "아랍어": getScore(/[\u0600-\u06FF]/g),
+        "러시아어": getScore(/[а-яА-ЯёЁ]/g),
+        "latin": getScore(/[a-zA-Z]/g)
+      };
+
+      const maxScript = Object.keys(scores).reduce((a, b) => scores[a as keyof typeof scores] > scores[b as keyof typeof scores] ? a : b);
+
+      if (maxScript !== "latin" && scores[maxScript as keyof typeof scores] > 10) {
+        newLang = maxScript;
       } else {
         const detected = detector.detect(fullText, 3);
         if (detected.length > 0) {
