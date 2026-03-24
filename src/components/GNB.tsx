@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Globe, User, LogOut, Bookmark, Film } from "lucide-react";
+import { Home, Globe, User, LogOut, Bookmark, Film, MonitorSmartphone } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { SupportedLanguage } from "@/i18n/dictionaries";
@@ -17,6 +17,10 @@ export function GNB() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [authChecking, setAuthChecking] = useState(true);
+
+  // PWA State
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstallable, setIsInstallable] = useState(false);
 
   const supabase = createClient();
 
@@ -32,8 +36,38 @@ export function GNB() {
       setUser(session?.user ?? null);
     });
 
-    return () => subscription.unsubscribe();
+    // PWA Setup
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => console.error(err));
+      });
+    }
+
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallable(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true) {
+      setIsInstallable(false);
+    }
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
   }, [supabase.auth]);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') setIsInstallable(false);
+    setDeferredPrompt(null);
+  };
 
   const handleLogin = async () => {
     await supabase.auth.signInWithOAuth({
@@ -122,6 +156,18 @@ export function GNB() {
                 )}
               </AnimatePresence>
             </div>
+
+            {/* PWA Install Button */}
+            {isInstallable && (
+              <button 
+                onClick={handleInstallClick}
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-neon-blue/20 to-neon-purple/20 border border-neon-blue/50 hover:bg-neon-blue/20 transition-all text-sm font-medium text-neon-blue shadow-[0_0_10px_rgba(0,242,254,0.3)]"
+                title="앱 설치하기"
+              >
+                <MonitorSmartphone className="w-4 h-4" />
+                <span>앱 설치</span>
+              </button>
+            )}
 
             {/* Auth Section */}
             <div className="relative flex items-center gap-2">

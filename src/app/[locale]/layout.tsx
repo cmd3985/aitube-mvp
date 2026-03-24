@@ -33,7 +33,6 @@ import { GNB } from "@/components/GNB";
 import { LanguageProvider } from "@/i18n/LanguageContext";
 import { dictionaries, SupportedLanguage } from "@/i18n/dictionaries";
 import Link from "next/link";
-import { InstallPWA } from "@/components/InstallPWA";
 
 export default async function RootLayout({
   children,
@@ -63,7 +62,6 @@ export default async function RootLayout({
               {t.privacyPolicy}
             </Link>
           </footer>
-          <InstallPWA />
         </LanguageProvider>
       </body>
     </html>
