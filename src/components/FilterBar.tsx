@@ -93,20 +93,6 @@ export function FilterBar({
           <Globe className="w-4 h-4" />
           <span className="text-sm font-medium">{t("language")}</span>
         </div>
-        
-        {/* CC Toggle */}
-        <button
-          onClick={() => onCCChange && onCCChange(!activeCC)}
-          className={`relative px-4 py-2 rounded-full text-sm font-bold transition-all border flex items-center gap-1.5
-            ${activeCC ? "bg-neon-cyan/20 text-neon-cyan border-neon-cyan/50 shadow-[0_0_10px_rgba(0,255,255,0.3)]" : "text-gray-400 border-white/10 hover:text-white glass"}
-          `}
-          title="Show only videos allowing secondary creation"
-        >
-          <span className={`text-[10px] px-1 rounded-sm shrink-0 ${activeCC ? "bg-neon-cyan text-black" : "bg-gray-400 text-black"}`}>CC</span>
-          {lang === "KO" ? "CC 허용" : "CC Allowed"}
-        </button>
-        
-        <div className="w-px h-6 bg-white/10 mx-1 hidden sm:block"></div>
 
         {LANGUAGES.map((langOpt) => {
           const isActive = activeLanguage === langOpt;
@@ -125,7 +111,7 @@ export function FilterBar({
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}
-              <span className="relative z-10">{getLangDisplay(lang)}</span>
+              <span className="relative z-10">{getLangDisplay(langOpt)}</span>
             </button>
           );
         })}
@@ -163,43 +149,58 @@ export function FilterBar({
           })}
         </div>
 
-        {/* Sort Dropdown */}
-        <div className="relative w-full md:w-48 flex-shrink-0 z-50">
+        {/* Action Container: CC Toggle + Sort Dropdown */}
+        <div className="flex items-stretch gap-3 w-full md:w-auto h-[46px]">
+          
+          {/* Restyled CC Toggle Button */}
           <button
-            onClick={() => setIsSortOpen(!isSortOpen)}
-            className="glass px-4 py-2 rounded-lg flex items-center gap-3 text-sm font-medium text-white hover:border-neon-purple/50 transition-colors w-full justify-between"
+            onClick={() => onCCChange && onCCChange(!activeCC)}
+            className={`relative px-4 rounded-lg text-sm font-bold transition-all border flex items-center justify-center
+              ${activeCC ? "bg-neon-cyan/20 text-neon-cyan border-neon-cyan/50 shadow-[0_0_10px_rgba(0,255,255,0.3)]" : "text-gray-400 border-white/10 hover:text-white glass"}
+            `}
+            title="Creative Commons (2차 창작 가능)"
           >
-            <div className="flex flex-col items-start">
-              <span className="text-[10px] text-gray-400 uppercase tracking-wider">{t("sortBy")}</span>
-              <span>{activeSortLabel}</span>
-            </div>
-            <ChevronDown className={`w-4 h-4 transition-transform ${isSortOpen ? "rotate-180" : ""}`} />
+            <span className={`text-[11px] px-1.5 py-0.5 rounded-sm shrink-0 ${activeCC ? "bg-neon-cyan text-black" : "bg-gray-700 text-white"}`}>CC</span>
           </button>
 
-          {isSortOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="absolute top-full right-0 mt-2 w-full glass rounded-lg overflow-hidden flex flex-col p-1 z-50 border-neon-purple/30 shadow-[0_4px_20px_rgba(139,92,246,0.15)]"
+          {/* Sort Dropdown */}
+          <div className="relative w-full md:w-48 flex-shrink-0 z-50 h-[46px]">
+            <button
+              onClick={() => setIsSortOpen(!isSortOpen)}
+              className="glass px-4 py-2 rounded-lg flex items-center gap-3 text-sm font-medium text-white hover:border-neon-purple/50 transition-colors w-full h-full justify-between"
             >
-              {SORT_OPTIONS.map((option) => {
-                const Icon = option.icon;
-                const isActive = activeSort === option.id;
-                return (
-                  <button
-                    key={option.id}
-                    onClick={() => handleSortClick(option.id)}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors text-left
-                      ${isActive ? "bg-white/10 text-neon-blue font-medium" : "text-gray-300 hover:bg-white/5 hover:text-white"}
-                    `}
-                  >
-                    <Icon className="w-4 h-4 opacity-70" />
-                    {option.label}
-                  </button>
-                );
-              })}
-            </motion.div>
-          )}
+              <div className="flex flex-col items-start leading-tight">
+                <span className="text-[10px] text-gray-400 uppercase tracking-wider">{t("sortBy")}</span>
+                <span>{activeSortLabel}</span>
+              </div>
+              <ChevronDown className={`w-4 h-4 transition-transform ${isSortOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {isSortOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="absolute top-full right-0 mt-2 w-full glass rounded-lg overflow-hidden flex flex-col p-1 z-50 border-neon-purple/30 shadow-[0_4px_20px_rgba(139,92,246,0.15)]"
+              >
+                {SORT_OPTIONS.map((option) => {
+                  const Icon = option.icon;
+                  const isActive = activeSort === option.id;
+                  return (
+                    <button
+                      key={option.id}
+                      onClick={() => handleSortClick(option.id)}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors text-left
+                        ${isActive ? "bg-white/10 text-neon-blue font-medium" : "text-gray-300 hover:bg-white/5 hover:text-white"}
+                      `}
+                    >
+                      <Icon className="w-4 h-4 opacity-70" />
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </motion.div>
+            )}
+          </div>
         </div>
       </div>
       
