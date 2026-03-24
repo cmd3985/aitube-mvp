@@ -55,6 +55,75 @@ export async function GET(req: Request) {
         const descLower = v.description.toLowerCase();
         const fullText = (titleLower + " " + descLower);
 
+        // --- STEP 1: Multi-lingual Blacklist (Drop, Cost 0) ---
+        const blacklist = [
+          "결말포함", "영화리뷰", "명작", "요약", "몰아보기", "스포", "평론", "후기", "리뷰", "수상 소감", "메이킹", "비하인드", "튜토리얼", "강의", "만드는 법", "만드는법", "제작기", "제작 과정", "제작과정", "노하우", "꿀팁", "팁", "강좌", "가이드", "수익창출", "돈 버는", "돈버는", "부업", "클래스", "사용법", "활용법", "기초", "입문", "추천", "소개", "플랫폼", "사이트", "공모전", "만들기", "방법", "도구", "무료", "수업", "단계", "테스트", "활용", "방법", "툴", "촬영 감독", "메이크업", "안무가", "스타일리스트", "뮤직비디오", // KO
+          "ending explained", "recap", "movie review", "explained", "summary", "reaction", "how to", "tutorial", "vlog", "behind the scenes", "making of", "review", "tips", "guide", "course", "workflow", "how i made", "how i make", "process", "make money", "passive income", "bts", "best ai", "top 10", "free tool", "software", "platform", "website", "beginner", "introduction", "basics", "step by step", "steps", "demo", "promt", "prompt", "cameraman", "make-up", "makeup", "choreography", "playback singer", "child artist", "costume designer", "music label", "official music video", "official trailer", "star cast", "starring:", "staring ", "starring ", "cast:", "cast -", "dop :", "dop -", "production house", "all rights reserved", "music director", "singer -", "singer :", "label :", "label -", "dubbed movie", "bhojpuri movie", "haryanvi movie", "punjabi movie", "south movie", "new hindi movie", "full hd movie", "artists -", "artists :", "buy link", "meesho.com", "amazon.com", // EN
+          "ネタバレ", "レビュー", "結末", "解説", "要約", "反応", "作り方", "メイキング", "ヒント", "裏側", "稼ぎ方", "講座", // JA
+          "resumen", "reseña", "final explicado", "crítica", "résumé", "fin expliquée", "resumo", "tutorial", "cómo hacer", "consejos", "trucos", "detrás de cámaras", "tutoriel", "tuto", "coulisses", "astuces", "dicas", "como fazer", // ES/FR/PT
+          "解说", "影评", "结局", "剧透", "解說", "影評", "스포일러", "समीक्षा", "स्पष्टीकरण", "教程", "幕后", "技巧", "赚钱", "怎么做", "ट्यूटोरियल", "सुझाव", // ZH/HI
+          "مراجعة فيلم", "نهاية مشروحة", "الجزء", "ملخص", "شرح", "كيف تصنع", "نصائح", "دورة", // AR
+          "ulasan film", "penjelasan akhir", "alur cerita", "tutorial", "cara membuat", "tips", // ID
+          "обзор фильма", "концовка объяснение", "краткий пересказ", "объяснение", "туториал", "как сделать", "советы", // RU
+          "filmkritik", "ende erklärt", "zusammenfassung", "erklärung", "tutorial", "tipps", "wie man", "hinter den kulissen" // DE
+        ];
+        
+        const isBlacklisted = blacklist.some(p => fullText.includes(p));
+        const channelLower = (v.channelTitle || "").toLowerCase();
+        const channelIsReview = channelLower.includes("review") || channelLower.includes("recap") || channelLower.includes("리뷰");
+        
+        if (isBlacklisted || channelIsReview) {
+          continue; // Drop video entirely
+        }
+
+        // --- STEP 2: Multi-lingual Whitelist (Fast-Pass, Cost 0) ---
+        const whitelist = [
+          "ai short film", "ai movie", "ai cinematic", "ai webdrama", "full ai film", "ai generated film",
+          "ai 단편영화", "ai 영화", "ai 웹드라마", "ai 애니메이션", "ai 시네마",
+          "ai短編映画", "ai映画", "aiアニメ", "ai生成動画", "フルai映画",
+          "cortometraje ai", "cortometraje ia", "película ai", "película ia", "court métrage ia", "film ia", "curta-metragem ia", "filme ia",
+          "ai短片", "ai电影", "ai微电影", "ai生成视频", "ai 微電影", "ai 生成視頻", "ai शॉर्ट फिल्म", "ai फिल्म",
+          "فيلم قصير بالذكاء الاصطناعي", "فيلم ذكاء اصطناعي",
+          "film pendek ai", "film ai",
+          "ии короткометражный фильм", "ии фильм", "ki kurzfilm", "ki film"
+        ];
+        const isWhitelisted = whitelist.some(p => titleLower.includes(p) || descLower.includes(p));
+
+        // --- STEP 3: LLM Grey Area Check (Cost) ---
+        if (!isWhitelisted) {
+          if (process.env.OPENAI_API_KEY) {
+            try {
+              const llmRes = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                  "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  model: "gpt-4o-mini",
+                  messages: [
+                    { 
+                      role: "system", 
+                      content: "당신은 영상 판별 전문가입니다. 제목과 설명을 보고, 이 영상이 오직 생성형 AI 툴(Midjourney, Runway, Veo, Sora 등)로 직접 제작된 영상물인지 판별하세요. 1) 상업 영화 리뷰/다큐/뉴스, 2) 언리얼 엔진이나 블렌더 등으로 만든 일반적인 3D/인디 애니메이션(명시적인 AI 언급이 없는 경우), 3) AI 툴 튜토리얼이나 추천 쇼케이스 영상이라면 무조건 ABOUT-AI로 답하세요. 오직 AI로 직접 만든 창작 영화/영상물만 MADE-WITH-AI로 대답하세요." 
+                    },
+                    { role: "user", content: `제목: ${v.title}\n설명: ${v.description}` }
+                  ],
+                  max_tokens: 10,
+                  temperature: 0
+                })
+              });
+              const llmData = await llmRes.json();
+              const answer = llmData.choices?.[0]?.message?.content?.trim();
+              if (answer !== "MADE-WITH-AI") {
+                continue; // Drop if LLM says it's not made with AI
+              }
+            } catch(e) {
+              console.error("LLM Verification Error:", e);
+              continue; // Drop if API fails
+            }
+          }
+        }
+
         // Calculate language
         let language = "영어"; // default
         const getLatinScore = (regex: RegExp) => {
