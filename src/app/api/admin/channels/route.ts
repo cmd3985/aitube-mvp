@@ -35,7 +35,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const adminClient = getAdminClient();
-    const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY!;
+    const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || "AIzaSyDI6God8EP2mVf6P9Tz7s4mbuDXzw2RIq4";
     
     const { input } = await req.json();
     if (!input) return NextResponse.json({ error: 'YouTube channel URL or handle is required' }, { status: 400 });
@@ -67,6 +67,11 @@ export async function POST(req: Request) {
     // Fetch Channel info from YouTube API
     const ytRes = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet&${ytQuery}&key=${YOUTUBE_API_KEY}`);
     const ytData = await ytRes.json();
+
+    if (!ytRes.ok) {
+        console.error("YouTube API Error:", ytData);
+        return NextResponse.json({ error: `YouTube API Error: ${ytData.error?.message || "Unknown error"}` }, { status: ytRes.status });
+    }
 
     if (!ytData.items || ytData.items.length === 0) {
       return NextResponse.json({ error: 'YouTube channel not found. Please verify the URL or handle.' }, { status: 404 });
