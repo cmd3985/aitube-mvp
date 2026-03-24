@@ -239,6 +239,7 @@ export async function GET(req: Request) {
           like_count: video.likeCount,
           comment_count: video.commentCount,
           engagement_score: video.engagementScore,
+          is_cc: video.is_cc
         }, { onConflict: "youtube_id" });
 
       if (upsertError) {

@@ -85,7 +85,8 @@ export async function POST(request: Request) {
       tags: snippet.tags || [],
       engagement_score: engagementScore,
       status: 'pending',
-      submitter_id: user.id
+      submitter_id: user.id,
+      is_cc: item.status.license === 'creativeCommon'
     });
 
     if (dbError) {

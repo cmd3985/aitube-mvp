@@ -11,8 +11,8 @@ export interface YouTubeVideoInfo {
   rawViewCount: number;
   likeCount: number;
   commentCount: number;
-  uploadedAt: string;
   channelTitle: string;
+  is_cc: boolean;
 }
 
 const API_KEY = process.env.YOUTUBE_API_KEY || "AIzaSyDI6God8EP2mVf6P9Tz7s4mbuDXzw2RIq4";
@@ -217,7 +217,8 @@ export async function fetchAIVideos(query: string = "AI short film", maxResults:
           likeCount: parseInt(item.statistics.likeCount || "0", 10) || 0,
           commentCount: parseInt(item.statistics.commentCount || "0", 10) || 0,
           uploadedAt: item.snippet.publishedAt, // Raw ISO-8601 for accurate DB sorting
-          channelTitle: item.snippet.channelTitle
+          channelTitle: item.snippet.channelTitle,
+          is_cc: item.status?.license === 'creativeCommon'
         };
       })
     );

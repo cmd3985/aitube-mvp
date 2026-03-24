@@ -24,6 +24,7 @@ interface WatchVideoData {
   ai_tool_tags: string;
   language: string;
   engagementScore: number;
+  is_cc: boolean;
 }
 
 function formatCompact(num: number): string {
@@ -46,6 +47,7 @@ export function WatchContent({ video, recommended }: { video: WatchVideoData; re
     channelTitle: r.channelTitle,
     rawDate: r.rawDate,
     language: r.language,
+    is_cc: r.is_cc,
   }));
 
   return (
@@ -77,8 +79,13 @@ export function WatchContent({ video, recommended }: { video: WatchVideoData; re
       {/* ===== VIDEO INFO SECTION ===== */}
       <section className="max-w-6xl mx-auto px-4 py-6">
         {/* Title */}
-        <h1 className="text-2xl md:text-3xl font-bold leading-snug mb-4">
-          {video.title}
+        <h1 className="text-2xl md:text-3xl font-bold leading-snug mb-4 flex items-start gap-3">
+          {video.is_cc && (
+            <span className="shrink-0 mt-1 px-2 py-0.5 text-sm font-bold bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/30 rounded" title="Creative Commons (2차 창작 가능)">
+              CC
+            </span>
+          )}
+          <span>{video.title}</span>
         </h1>
 
         {/* Social Proof Row */}
