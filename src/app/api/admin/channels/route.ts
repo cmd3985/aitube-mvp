@@ -65,7 +65,9 @@ export async function POST(req: Request) {
     }
 
     // Fetch Channel info from YouTube API
-    const ytRes = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet&${ytQuery}&key=${YOUTUBE_API_KEY}`);
+    const ytRes = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet&${ytQuery}&key=${YOUTUBE_API_KEY}`, {
+      headers: { 'Referer': 'https://gencine.org/' }
+    });
     const ytData = await ytRes.json();
 
     if (!ytRes.ok) {
