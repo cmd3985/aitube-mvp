@@ -82,7 +82,7 @@ export async function GET(req: Request) {
           "ai 단편영화", "ai 영화", "ai 웹드라마", "ai 애니메이션", "ai 시네마",
           "ai短編映画", "ai映画", "aiアニメ", "ai生成動画", "フルai映画",
           "cortometraje ai", "cortometraje ia", "película ai", "película ia", "court métrage ia", "film ia", "curta-metragem ia", "filme ia",
-          "ai短片", "ai电影", "ai微电影", "ai生成视频", "ai 微電影", "ai 生成視頻", "ai शॉर्ट फिल्म", "ai फिल्म",
+          "ai短片", "ai电影", "ai微电影", "ai生成视频", "ai 微電影", "ai 生成視頻",
           "فيلم قصير بالذكاء الاصطناعي", "فيلم ذكاء اصطناعي",
           "film pendek ai", "film ai",
           "ии короткометражный фильм", "ии фильм", "ki kurzfilm", "ki film"

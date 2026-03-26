@@ -36,8 +36,6 @@ export async function GET(req: Request) {
       { q: "AI短片", lang: "zh", region: "TW" },
       { q: "AI微电影", lang: "zh", region: "HK" },
       { q: "AI生成视频", lang: "zh", region: "TW" },
-      { q: "AI शॉर्ट फिल्म", lang: "hi", region: "IN" },
-      { q: "AI फिल्म", lang: "hi", region: "IN" },
       { q: "فيلم قصير بالذكاء الاصطناعي", lang: "ar", region: "AE" },
       { q: "فيلم ذكاء اصطناعي", lang: "ar", region: "AE" },
       { q: "film pendek AI", lang: "id", region: "ID" },
