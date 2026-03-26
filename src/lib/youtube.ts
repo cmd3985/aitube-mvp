@@ -258,6 +258,7 @@ export async function fetchChannelLatestVideos(channelId: string, maxResults: nu
       if (!item) continue;
 
       if (!item.status?.embeddable || !item.status?.publicStatsViewable) continue;
+      if (item.contentDetails?.contentRating?.ytRating === 'ytAgeRestricted') continue; // Skip age-restricted
 
       const durationSec = getDurationSeconds(item.contentDetails.duration);
       if (durationSec < 60) continue; // Skip shorts
